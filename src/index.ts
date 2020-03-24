@@ -1,35 +1,48 @@
 import * as fastify from "fastify";
-import { Server, IncomingMessage, ServerResponse } from "http";
-import statusRoutes from "./routes/status";
+import statusRoutes from "./modules/status";
+import gameRoutes from "./modules/game/routes";
+import userRoutes from "./modules/users/routes";
 import * as helmet from "fastify-helmet";
 import * as websocket from "fastify-websocket";
-import * as circuitBreaker from "fastify-circuit-breaker";
 import * as fastifyCookie from "fastify-cookie";
 import * as formBody from "fastify-formbody";
 
-const server: fastify.FastifyInstance<
-  Server,
-  IncomingMessage,
-  ServerResponse
-> = fastify();
+const IS_TEST = process.env.NODE_ENV === "test";
+
+const server: fastify.FastifyInstance = fastify({
+  ajv: { customOptions: { schemaId: "auto" } },
+});
 
 // └── plugins (from the Fastify ecosystem)
+server.register(
+  require("fastify-typeorm-plugin"),
+  IS_TEST
+    ? {
+        type: "sqlite",
+        database: ":memory:",
+        dropSchema: true,
+        entities: ["src/dao/entities/*.ts"],
+        synchronize: true,
+        logging: false,
+      }
+    : require("../ormconfig.json")
+);
 server.register(websocket);
-server.register(circuitBreaker);
 server.register(fastifyCookie);
 server.register(formBody);
 // └── your plugins (your custom plugins)
 // └── decorators
-// └── hooks and middlewares
+// └── hooks and middleware
 server.register(helmet);
 // └── your services
 server.register(statusRoutes);
+server.register(gameRoutes);
+server.register(userRoutes);
 
 const start = async (port: number = 3000) => {
   try {
     await server.listen(port, "0.0.0.0");
-    console.log("Started server at port 3000");
-    // server.blipp();
+    console.log(`Started server at port ${port}`);
   } catch (err) {
     console.log(err);
     server.log.error(err);
@@ -40,10 +53,20 @@ const start = async (port: number = 3000) => {
 process.on("uncaughtException", (error) => {
   console.error(error);
 });
+
 process.on("unhandledRejection", (error) => {
   console.error(error);
 });
 
 const { PORT } = process.env;
 
-start(parseInt(PORT, 10));
+PORT ? start(parseInt(PORT, 10)) : start();
+
+process.on("SIGINT", async () => {
+  console.log("stopping server");
+  await server.close();
+  console.log("server stopped");
+  process.exit(0);
+});
+
+export default server;

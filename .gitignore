@@ -1,5 +1,7 @@
 .vscode
 
+db
+
 # Logs
 logs
 *.log

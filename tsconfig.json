@@ -1,17 +1,19 @@
 {
-    "compilerOptions": {
-        "baseUrl": ".",
-        "lib": ["es2016", "DOM"],
-        "paths": {
-        "*": ["src/*"]
-        },
-        "allowJs": true,
-        "target": "es2016",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "sourceMap": true,
-        "outDir": "./dist"
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "lib": ["ES2019", "ES2015"],
+    "paths": {
+      "*": ["src/*"]
     },
-    "include": ["./src/**/*.ts"],
-    "exclude": ["node_modules"]
+    "allowJs": true,
+    "target": "ES2019",
+    "module": "commonjs",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "strict": true
+  },
+  "include": ["./src/**/*.ts", "index.d.ts", "./types/*.d.ts"],
+  "exclude": ["node_modules"],
 }

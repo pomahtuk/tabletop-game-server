@@ -1,0 +1,17 @@
+{
+  "type": "sqlite",
+  "name": "default",
+  "database": "db",
+  "migrationsRun": true,
+  "migrations": [
+    "src/dao/migrations/*.{js|ts}"
+  ],
+  "entities": [
+    "src/dao/entities/*.ts"
+  ],
+  "cli": {
+    "entitiesDir": "src/dao/entities",
+    "migrationsDir": "src/dao/migrations",
+    "subscribersDir": "src/dao/subscribers"
+  }
+}
