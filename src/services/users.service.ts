@@ -59,6 +59,9 @@ export class UsersService {
           error
         );
       }
+      // NOTE: ignoring branch not corresponding to expected exception as other exceptions
+      // are not supposed to happen anw will be an indication of DB issue, so, external dependency
+      /* istanbul ignore next */
       throw new HttpException(
         "Something went wrong",
         INTERNAL_SERVER_ERROR,
@@ -88,6 +91,9 @@ export class UsersService {
             error
           );
         }
+        // NOTE: ignoring branch not corresponding to expected exception as other exceptions
+        // are not supposed to happen anw will be an indication of DB issue, so, external dependency
+        /* istanbul ignore next */
         throw new HttpException(
           "Something went wrong",
           INTERNAL_SERVER_ERROR,
