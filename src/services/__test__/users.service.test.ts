@@ -258,4 +258,28 @@ describe("UsersService", () => {
     }
     await usersService.deleteUser(user.id as string);
   });
+
+  it("Throwing error when user with given id does not exist", async (): Promise<
+    void
+  > => {
+    try {
+      await usersService.getUser("111");
+    } catch (exception) {
+      expect(exception).toBeDefined();
+      expect(exception).toBeInstanceOf(HttpException);
+      expect(exception.message).toBe("User with this id does not exist");
+    }
+  });
+
+  it("Throwing error when user with given email does not exist", async (): Promise<
+    void
+  > => {
+    try {
+      await usersService.getUserByEmail("111");
+    } catch (exception) {
+      expect(exception).toBeDefined();
+      expect(exception).toBeInstanceOf(HttpException);
+      expect(exception.message).toBe("User with this email does not exist");
+    }
+  });
 });

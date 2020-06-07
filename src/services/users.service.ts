@@ -75,33 +75,28 @@ export class UsersService {
     if (newUser.id && newUser.id !== userId) {
       throw new HttpException("Changing User id is forbidden", FORBIDDEN);
     }
-    const user = await this.repo.findOne(userId, {
-      relations: ["games"],
-    });
-    if (user) {
-      const userInstance = await this.validateUser(newUser);
-      try {
-        this.repo.merge(user, userInstance);
-        return await this.repo.save(user);
-      } catch (error) {
-        if (error?.code === "SQLITE_CONSTRAINT") {
-          throw new HttpException(
-            "User with that email or username already exists",
-            BAD_REQUEST,
-            error
-          );
-        }
-        // NOTE: ignoring branch not corresponding to expected exception as other exceptions
-        // are not supposed to happen anw will be an indication of DB issue, so, external dependency
-        /* istanbul ignore next */
+    const userInstance = await this.validateUser(newUser);
+    const user = await this.getUser(userId);
+    try {
+      this.repo.merge(user, userInstance);
+      return await this.repo.save(user);
+    } catch (error) {
+      if (error?.code === "SQLITE_CONSTRAINT") {
         throw new HttpException(
-          "Something went wrong",
-          INTERNAL_SERVER_ERROR,
+          "User with that email or username already exists",
+          BAD_REQUEST,
           error
         );
       }
+      // NOTE: ignoring branch not corresponding to expected exception as other exceptions
+      // are not supposed to happen anw will be an indication of DB issue, so, external dependency
+      /* istanbul ignore next */
+      throw new HttpException(
+        "Something went wrong",
+        INTERNAL_SERVER_ERROR,
+        error
+      );
     }
-    throw new HttpException("User with this id does not exist", NOT_FOUND);
   }
 
   private async validateUser(newUser: User): Promise<User> {
@@ -112,11 +107,11 @@ export class UsersService {
         "User is not valid",
         validationErrors.map(
           (e) =>
-            `property ${e.property} has failed the following constraints: ${
-              e.constraints
-                ? Object.keys(e.constraints).map((key) => e.constraints![key])
-                : ""
-            }`
+            `property ${
+              e.property
+            } has failed the following constraints: ${Object.keys(
+              e.constraints!
+            ).map((key) => e.constraints![key])}`
         )
       );
     }
