@@ -17,16 +17,16 @@ export enum GameStatus {
 @Entity()
 export class Game {
   @PrimaryGeneratedColumn("uuid")
-  id: string | undefined;
+  public id!: string;
 
-  @ManyToMany((type) => User)
+  @ManyToMany(() => User)
   @JoinTable()
-  users: User[] | undefined;
+  public users!: User[];
 
   @Column({
     type: "text",
     enum: GameStatus,
     default: GameStatus.NOT_STARTED,
   })
-  status: GameStatus | undefined;
+  public status!: GameStatus;
 }

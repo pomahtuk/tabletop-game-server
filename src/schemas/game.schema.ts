@@ -1,4 +1,4 @@
-import { UserSchema } from "../users/schema";
+import { UserSchema } from "./user.schema";
 
 export const GameSchema: any = {
   id: { type: "string", format: "uuid" },

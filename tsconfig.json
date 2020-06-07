@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "baseUrl": ".",
     "lib": ["ES2019", "ES2015"],
-    "paths": {
-      "*": ["src/*"]
-    },
     "allowJs": true,
     "target": "ES2019",
     "module": "commonjs",
@@ -14,6 +12,6 @@
     "declaration": true,
     "strict": true
   },
-  "include": ["./src/**/*.ts", "index.d.ts", "./types/*.d.ts"],
-  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts", "index.d.ts"],
+  "exclude": ["node_modules"]
 }

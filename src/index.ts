@@ -1,11 +1,14 @@
 import * as fastify from "fastify";
-import statusRoutes from "./modules/status";
-import gameRoutes from "./modules/game/routes";
-import userRoutes from "./modules/users/routes";
 import * as helmet from "fastify-helmet";
 import * as websocket from "fastify-websocket";
 import * as fastifyCookie from "fastify-cookie";
 import * as formBody from "fastify-formbody";
+import * as jwt from "fastify-jwt";
+
+import statusRoutes from "./routes/status.routes";
+import gameRoutes from "./routes/game.routes";
+import userRoutes from "./routes/user.routes";
+import authRoutes from "./routes/auth.routes";
 
 const IS_TEST = process.env.NODE_ENV === "test";
 
@@ -14,6 +17,12 @@ const server: fastify.FastifyInstance = fastify({
 });
 
 // └── plugins (from the Fastify ecosystem)
+server.register(jwt, {
+  secret: "some secret super secret here",
+  cookie: {
+    cookieName: "token",
+  },
+});
 server.register(
   require("fastify-typeorm-plugin"),
   IS_TEST
@@ -38,6 +47,7 @@ server.register(helmet);
 server.register(statusRoutes);
 server.register(gameRoutes);
 server.register(userRoutes);
+server.register(authRoutes);
 
 const start = async (port: number = 3000) => {
   try {

@@ -1,8 +1,10 @@
 import * as fp from "fastify-plugin";
 
-import { Game } from "../../dao/entities/game";
-// import { User } from "../../dao/entities/user";
-import { listGamesSchema, postGameSchema, putGameSchema } from "./schema";
+import {
+  listGamesSchema,
+  postGameSchema,
+  putGameSchema,
+} from "../schemas/game.schema";
 import {
   FastifyRequest,
   FastifyReply,
@@ -10,13 +12,16 @@ import {
   FastifyError,
 } from "fastify";
 import { ServerResponse } from "http";
+import { GameService } from "../services/game.service";
 
 export default fp(
   async (
     fastify: FastifyInstance,
-    opts: any,
-    done: (err?: FastifyError | undefined) => void
+    _opts: any,
+    next: (err?: FastifyError | undefined) => void
   ) => {
+    const gameService = new GameService();
+
     // list
     fastify.route({
       url: "/games",
@@ -27,10 +32,7 @@ export default fp(
         request: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        const games = await fastify.orm.getRepository(Game).find({
-          relations: ["users"],
-        });
-
+        const games = await gameService.getGames();
         return reply.send(games);
       },
     });
@@ -44,12 +46,7 @@ export default fp(
         request: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        const game = await fastify.orm
-          .getRepository(Game)
-          .findOne(request.params.gameId, {
-            relations: ["users"],
-          });
-
+        const game = gameService.getGame(request.params.gameId);
         return reply.send(game);
       },
     });
@@ -64,11 +61,8 @@ export default fp(
         request: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        const gameRepository = fastify.orm.getRepository(Game);
-
-        const game = await gameRepository.create(request.body);
-        const results = await gameRepository.save(game);
-        return reply.send(results);
+        const game = gameService.createGame(request.body);
+        return reply.send(game);
       },
     });
 
@@ -82,16 +76,11 @@ export default fp(
         request: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        const gameRepository = fastify.orm.getRepository(Game);
-        const game = await gameRepository.findOne(request.params.gameId, {
-          relations: ["users"],
-        });
-        if (!game) {
-          return reply.code(404).send("not found");
-        }
-        gameRepository.merge(game, request.body);
-        const results = await gameRepository.save(game);
-        return reply.send(results);
+        const game = await gameService.updateGame(
+          request.params.gameId,
+          request.body
+        );
+        return reply.send(game);
       },
     });
 
@@ -104,14 +93,12 @@ export default fp(
         request: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        const result = await fastify.orm
-          .getRepository(Game)
-          .delete(request.params.gameId);
+        const result = await gameService.deleteGame(request.params.gameId);
 
         return reply.send(result);
       },
     });
 
-    done();
+    next();
   }
 );
