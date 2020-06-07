@@ -5,6 +5,7 @@ import {
   FastifyReply,
   FastifyInstance,
   FastifyError,
+  CookieSerializeOptions,
 } from "fastify";
 import { ServerResponse } from "http";
 
@@ -21,6 +22,14 @@ export default fp(
     const usersService = new UsersService();
     const authService = new AuthService(usersService);
 
+    const cookieOptions: CookieSerializeOptions = {
+      // domain: 'your.domain',
+      path: "/",
+      // secure: true, // send cookie over HTTPS only
+      httpOnly: true,
+      sameSite: true, // alternative CSRF protection
+    };
+
     // user register
     fastify.route({
       url: "/auth/register",
@@ -34,15 +43,7 @@ export default fp(
         const user = await authService.register(req.body);
         const token = await reply.jwtSign({ ...user });
 
-        return reply
-          .setCookie("token", token, {
-            // domain: 'your.domain',
-            // path: '/',
-            // secure: true, // send cookie over HTTPS only
-            httpOnly: true,
-            sameSite: true, // alternative CSRF protection
-          })
-          .send(user);
+        return reply.setCookie("token", token, cookieOptions).send(user);
       },
     });
 
@@ -64,29 +65,28 @@ export default fp(
           ...user,
         });
 
-        return reply
-          .setCookie("token", token, {
-            // domain: 'your.domain',
-            // path: '/',
-            // secure: true, // send cookie over HTTPS only
-            httpOnly: true,
-            sameSite: true, // alternative CSRF protection
-          })
-          .send(user);
+        return reply.setCookie("token", token, cookieOptions).send(user);
       },
     });
 
-    // test
+    // user logout
     fastify.route({
-      url: "/auth/test",
+      url: "/auth/logout",
       logLevel: "warn",
       method: ["GET", "HEAD"],
       handler: async (
         req: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        await req.jwtVerify();
-        return reply.send(req.user);
+        return reply
+          .clearCookie("token", {
+            // domain: 'your.domain',
+            path: "/",
+            // secure: true, // send cookie over HTTPS only
+            httpOnly: true,
+            sameSite: true, // alternative CSRF protection
+          })
+          .send("");
       },
     });
 
