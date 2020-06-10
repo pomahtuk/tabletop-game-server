@@ -49,7 +49,7 @@ server.register(gameRoutes);
 server.register(userRoutes);
 server.register(authRoutes);
 
-const start = async (port: number = 3000) => {
+const start = async (port: number = IS_TEST ? 3001 : 3000) => {
   try {
     await server.listen(port, "0.0.0.0");
     console.log(`Started server at port ${port}`);
