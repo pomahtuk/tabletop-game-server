@@ -4,6 +4,8 @@ import {
   Column,
   ManyToMany,
   JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 
 import { Game } from "./game";
@@ -55,4 +57,18 @@ export class User {
   @ManyToMany(() => Game)
   @JoinTable()
   public games?: Game[];
+
+  // password reset info
+  @Column({ type: "text", nullable: true })
+  public passwordResetToken?: string;
+
+  @Column({ type: "datetime", nullable: true })
+  public passwordResetTokenExpiresAt?: Date;
+
+  // Technical info
+  @CreateDateColumn()
+  public createdAt!: Date;
+
+  @UpdateDateColumn()
+  public updatedAt!: Date;
 }
