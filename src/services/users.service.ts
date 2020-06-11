@@ -47,7 +47,7 @@ export class UsersService {
   }
 
   public async createUser(newUser: User): Promise<User> {
-    const userInstance = await this.validateUser(newUser);
+    const userInstance = await this.validateIncomingUser(newUser);
     try {
       const user = this.repo.create(userInstance);
       return await this.repo.save(user);
@@ -75,7 +75,7 @@ export class UsersService {
     if (newUser.id && newUser.id !== userId) {
       throw new HttpException("Changing User id is forbidden", FORBIDDEN);
     }
-    const userInstance = await this.validateUser(newUser);
+    const userInstance = await this.validateIncomingUser(newUser);
     const user = await this.getUser(userId);
     try {
       this.repo.merge(user, userInstance);
@@ -99,8 +99,35 @@ export class UsersService {
     }
   }
 
-  private async validateUser(newUser: User): Promise<User> {
+  public async saveUser(user: User): Promise<User> {
+    try {
+      await this.validateUserInstance(user);
+      return await this.repo.save(user);
+    } catch (error) {
+      if (error?.code === "SQLITE_CONSTRAINT") {
+        throw new HttpException(
+          "User with that email or username already exists",
+          BAD_REQUEST,
+          error
+        );
+      }
+      // NOTE: ignoring branch not corresponding to expected exception as other exceptions
+      // are not supposed to happen anw will be an indication of DB issue, so, external dependency
+      /* istanbul ignore next */
+      throw new HttpException(
+        "Something went wrong",
+        INTERNAL_SERVER_ERROR,
+        error
+      );
+    }
+  }
+
+  private async validateIncomingUser(newUser: User): Promise<User> {
     const userInstance = new User(newUser);
+    return await this.validateUserInstance(userInstance);
+  }
+
+  private async validateUserInstance(userInstance: User): Promise<User> {
     const validationErrors = await validate(userInstance);
     if (validationErrors.length > 0) {
       throw new ValidationException(

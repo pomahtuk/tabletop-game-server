@@ -55,6 +55,8 @@ describe("UsersService", () => {
   it("Returns error on creating user with existing username", async (): Promise<
     void
   > => {
+    expect.assertions(2);
+
     const email = "random.user.test.exitsing.username@example.com";
     const username = "testuser1";
     const password = "super_secure_password";
@@ -76,6 +78,8 @@ describe("UsersService", () => {
   it("Returns error on creating user with existing email", async (): Promise<
     void
   > => {
+    expect.assertions(2);
+
     const username = "testuser2";
     const password = "super_secure_password";
 
@@ -117,6 +121,7 @@ describe("UsersService", () => {
   });
 
   it("Does not allow overriding user id", async (): Promise<void> => {
+    expect.assertions(3);
     try {
       await usersService.updateUser(testUserId, {
         id: "some",
@@ -132,6 +137,7 @@ describe("UsersService", () => {
   it("Throwing validation error when user password is too short", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     const userWithShortPassword = {
       username: "short_password",
       password: "pwd",
@@ -151,6 +157,7 @@ describe("UsersService", () => {
   it("Throwing validation error when user password does not match regex", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     const userWithShortPassword = {
       username: "wrong_password",
       password: "привет мир!",
@@ -170,6 +177,7 @@ describe("UsersService", () => {
   it("Throwing validation error when username is too short", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     const userWithShortPassword = {
       username: "srt",
       password: "hello_there_!",
@@ -189,6 +197,7 @@ describe("UsersService", () => {
   it("Throwing validation error when username does not match regex", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     const userWithShortPassword = {
       username: "hello there",
       password: "hello_there_!",
@@ -218,6 +227,7 @@ describe("UsersService", () => {
   it("Returns error when setting user email to already existing one", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     const user = await usersService.createUser({
       email: "non_existent@example.com",
       username: "new_test_user",
@@ -240,6 +250,7 @@ describe("UsersService", () => {
   it("Returns error when setting user username to already existing one", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     const user = await usersService.createUser({
       email: "non_existent1@example.com",
       username: "new_test_user1",
@@ -262,6 +273,7 @@ describe("UsersService", () => {
   it("Throwing error when user with given id does not exist", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     try {
       await usersService.getUser("111");
     } catch (exception) {
@@ -274,6 +286,7 @@ describe("UsersService", () => {
   it("Throwing error when user with given email does not exist", async (): Promise<
     void
   > => {
+    expect.assertions(3);
     try {
       await usersService.getUserByEmail("111");
     } catch (exception) {

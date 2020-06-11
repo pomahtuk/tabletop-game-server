@@ -4,6 +4,7 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "http-status-codes";
 import { UsersService } from "./users.service";
 import { User } from "../dao/entities/user";
 import { HttpException } from "../exceptions/httpException";
+import { hashPassword } from "../helpres/password";
 
 export class AuthService {
   private usersService: UsersService;
@@ -13,7 +14,7 @@ export class AuthService {
   }
 
   public async register(registrationData: any): Promise<User> {
-    const hashedPassword = await bcrypt.hash(registrationData.password, 10);
+    const hashedPassword = await hashPassword(registrationData.password);
     try {
       const createdUser = await this.usersService.createUser({
         ...registrationData,

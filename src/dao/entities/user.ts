@@ -6,6 +6,7 @@ import {
   JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from "typeorm";
 
 import { Game } from "./game";
@@ -35,6 +36,7 @@ export class User {
   @IsOptional()
   public username!: string;
 
+  @Index()
   @Column({ type: "text", unique: true })
   @IsEmail()
   @IsOptional()
@@ -60,15 +62,15 @@ export class User {
 
   // password reset info
   @Column({ type: "text", nullable: true })
-  public passwordResetToken?: string;
+  public passwordResetToken?: string | null;
 
   @Column({ type: "datetime", nullable: true })
-  public passwordResetTokenExpiresAt?: Date;
+  public passwordResetTokenExpiresAt?: Date | null;
 
   // Technical info
   @CreateDateColumn()
-  public createdAt!: Date;
+  public createdAt?: Date;
 
   @UpdateDateColumn()
-  public updatedAt!: Date;
+  public updatedAt?: Date;
 }

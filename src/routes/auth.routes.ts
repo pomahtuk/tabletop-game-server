@@ -12,6 +12,7 @@ import { ServerResponse } from "http";
 import { postUserSchema } from "../schemas/user.schema";
 import { UsersService } from "../services/users.service";
 import { AuthService } from "../services/auth.service";
+import { PasswordResetService } from "../services/password.reset.service";
 
 export default fp(
   async (
@@ -21,6 +22,7 @@ export default fp(
   ) => {
     const usersService = new UsersService();
     const authService = new AuthService(usersService);
+    const passwordResetService = new PasswordResetService(usersService);
 
     const cookieOptions: CookieSerializeOptions = {
       // domain: 'your.domain',
@@ -86,7 +88,43 @@ export default fp(
             httpOnly: true,
             sameSite: true, // alternative CSRF protection
           })
-          .send("");
+          .send({ status: "OK" });
+      },
+    });
+
+    // start password reset
+    fastify.route({
+      url: "/auth/reset/start",
+      logLevel: "warn",
+      method: "POST",
+      handler: async (
+        req: FastifyRequest,
+        reply: FastifyReply<ServerResponse>
+      ) => {
+        const email: string = req.body["email"];
+        await passwordResetService.startPasswordReset(email);
+        return reply.send({ status: "OK" });
+      },
+    });
+
+    // complete password reset
+    fastify.route({
+      url: "/auth/reset/complete",
+      logLevel: "warn",
+      method: "POST",
+      handler: async (
+        req: FastifyRequest,
+        reply: FastifyReply<ServerResponse>
+      ) => {
+        const email: string = req.body["email"];
+        const token: string = req.body["token"];
+        const password: string = req.body["password"];
+        await passwordResetService.resetPassword({
+          email,
+          token,
+          password,
+        });
+        return reply.send({ status: "OK" });
       },
     });
 
