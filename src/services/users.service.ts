@@ -47,7 +47,7 @@ export class UsersService {
   }
 
   public async createUser(newUser: User): Promise<User> {
-    const userInstance = await this.validateIncomingUser(newUser);
+    const userInstance = await UsersService.validateIncomingUser(newUser);
     try {
       const user = this.repo.create(userInstance);
       return await this.repo.save(user);
@@ -75,7 +75,7 @@ export class UsersService {
     if (newUser.id && newUser.id !== userId) {
       throw new HttpException("Changing User id is forbidden", FORBIDDEN);
     }
-    const userInstance = await this.validateIncomingUser(newUser);
+    const userInstance = await UsersService.validateIncomingUser(newUser);
     const user = await this.getUser(userId);
     try {
       this.repo.merge(user, userInstance);
@@ -101,7 +101,7 @@ export class UsersService {
 
   public async saveUser(user: User): Promise<User> {
     try {
-      await this.validateUserInstance(user);
+      await UsersService.validateUserInstance(user);
       return await this.repo.save(user);
     } catch (error) {
       if (error?.code === "SQLITE_CONSTRAINT") {
@@ -122,25 +122,15 @@ export class UsersService {
     }
   }
 
-  private async validateIncomingUser(newUser: User): Promise<User> {
+  private static async validateIncomingUser(newUser: User): Promise<User> {
     const userInstance = new User(newUser);
-    return await this.validateUserInstance(userInstance);
+    return await UsersService.validateUserInstance(userInstance);
   }
 
-  private async validateUserInstance(userInstance: User): Promise<User> {
+  private static async validateUserInstance(userInstance: User): Promise<User> {
     const validationErrors = await validate(userInstance);
     if (validationErrors.length > 0) {
-      throw new ValidationException(
-        "User is not valid",
-        validationErrors.map(
-          (e) =>
-            `property ${
-              e.property
-            } has failed the following constraints: ${Object.keys(
-              e.constraints!
-            ).map((key) => e.constraints![key])}`
-        )
-      );
+      throw new ValidationException("User is not valid", validationErrors);
     }
     return userInstance;
   }

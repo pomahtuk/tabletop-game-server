@@ -1,8 +1,10 @@
 import { UsersService } from "./users.service";
 import * as crypto from "crypto";
-import { hashPassword } from "../helpres/password";
+import { hashPassword, validatePassword } from "../helpres/password";
 import { HttpException } from "../exceptions/httpException";
 import { UNAUTHORIZED } from "http-status-codes";
+import ValidationException from "../exceptions/validationException";
+import { MailerService } from "./mailer.service";
 
 export interface PasswordResetRequest {
   email: string;
@@ -12,17 +14,22 @@ export interface PasswordResetRequest {
 
 export class PasswordResetService {
   private usersService: UsersService;
-  private TIME_FRAME: number = 30 * 60 * 1000;
+  private mailerService: MailerService;
+  private TIME_FRAME: number = 30 * 60 * 1000; // 30 minutes
 
-  constructor(usersService: UsersService) {
+  constructor(usersService: UsersService, mailerService: MailerService) {
     this.usersService = usersService;
+    this.mailerService = mailerService;
   }
 
   public async startPasswordReset(email: string): Promise<void> {
     const user = await this.usersService.getUserByEmail(email);
     user.passwordResetToken = crypto.randomBytes(5).toString("hex");
-    user.passwordResetTokenExpiresAt = new Date(Date.now() + this.TIME_FRAME); // 30 minutes from now
-    await this.usersService.saveUser(user);
+    user.passwordResetTokenExpiresAt = new Date(Date.now() + this.TIME_FRAME);
+    await Promise.all([
+      this.usersService.saveUser(user),
+      this.mailerService.sendResetEmail(user),
+    ]);
   }
 
   public async resetPassword(req: PasswordResetRequest): Promise<void> {
@@ -42,7 +49,10 @@ export class PasswordResetService {
       throw new HttpException("Password reset token expired.", UNAUTHORIZED);
     }
 
-    // FIXME: password has to to be validated before hashing
+    const pwdError = await validatePassword(req.password);
+    if (pwdError) {
+      throw new ValidationException("User is not valid", [pwdError]);
+    }
 
     user.password = await hashPassword(req.password);
     user.passwordResetToken = null;

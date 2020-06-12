@@ -15,7 +15,15 @@ describe("ValidationException", (): void => {
   });
 
   it("ValidationException with errors have BAD_REQUEST status and errors mentioned in message", (): void => {
-    const exception = new ValidationException("test", ["validation_error"]);
+    const exception = new ValidationException("test", [
+      {
+        property: "password",
+        children: [],
+        constraints: {
+          length: "validation_error",
+        },
+      },
+    ]);
     expect(exception).toBeDefined();
     expect(exception.message).toContain("test");
     expect(exception.message).toContain("validation_error");

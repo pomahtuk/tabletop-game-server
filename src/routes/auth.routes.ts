@@ -13,6 +13,7 @@ import { postUserSchema } from "../schemas/user.schema";
 import { UsersService } from "../services/users.service";
 import { AuthService } from "../services/auth.service";
 import { PasswordResetService } from "../services/password.reset.service";
+import { MailerServiceImpl } from "../services/mailer.service";
 
 export default fp(
   async (
@@ -22,7 +23,11 @@ export default fp(
   ) => {
     const usersService = new UsersService();
     const authService = new AuthService(usersService);
-    const passwordResetService = new PasswordResetService(usersService);
+    const mailerService = new MailerServiceImpl();
+    const passwordResetService = new PasswordResetService(
+      usersService,
+      mailerService
+    );
 
     const cookieOptions: CookieSerializeOptions = {
       // domain: 'your.domain',

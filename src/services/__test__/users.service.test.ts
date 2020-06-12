@@ -2,6 +2,7 @@ import { UsersService } from "../users.service";
 import createTestConnection from "../../testhelpers/createTestConnection";
 import { HttpException } from "../../exceptions/httpException";
 import ValidationException from "../../exceptions/validationException";
+import { BAD_REQUEST } from "http-status-codes";
 
 describe("UsersService", () => {
   let usersService: UsersService;
@@ -134,42 +135,20 @@ describe("UsersService", () => {
     }
   });
 
-  it("Throwing validation error when user password is too short", async (): Promise<
-    void
-  > => {
-    expect.assertions(3);
-    const userWithShortPassword = {
-      username: "short_password",
-      password: "pwd",
-      email: "test_validation@example.com",
-    };
+  it("Does not allow saving user with same email", async (): Promise<void> => {
+    expect.assertions(4);
     try {
-      await usersService.createUser(userWithShortPassword);
+      await usersService.saveUser({
+        username: "updated111111",
+        email: TEST_USER_EMAIL,
+        password: "1234567890",
+      });
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(ValidationException);
-      expect(exception.message).toContain(
-        "Must be between 6 and 255 characters long"
-      );
-    }
-  });
-
-  it("Throwing validation error when user password does not match regex", async (): Promise<
-    void
-  > => {
-    expect.assertions(3);
-    const userWithShortPassword = {
-      username: "wrong_password",
-      password: "привет мир!",
-      email: "test_validation@example.com",
-    };
-    try {
-      await usersService.createUser(userWithShortPassword);
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(ValidationException);
-      expect(exception.message).toContain(
-        "Can only contain numbers, letters and symbols"
+      expect(exception).toBeInstanceOf(HttpException);
+      expect(exception.status).toBe(BAD_REQUEST);
+      expect(exception.message).toBe(
+        "User with that email or username already exists"
       );
     }
   });

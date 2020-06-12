@@ -4,7 +4,8 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "http-status-codes";
 import { UsersService } from "./users.service";
 import { User } from "../dao/entities/user";
 import { HttpException } from "../exceptions/httpException";
-import { hashPassword } from "../helpres/password";
+import { hashPassword, validatePassword } from "../helpres/password";
+import ValidationException from "../exceptions/validationException";
 
 export class AuthService {
   private usersService: UsersService;
@@ -14,6 +15,10 @@ export class AuthService {
   }
 
   public async register(registrationData: any): Promise<User> {
+    const pwdError = await validatePassword(registrationData.password);
+    if (pwdError) {
+      throw new ValidationException("User is not valid", [pwdError]);
+    }
     const hashedPassword = await hashPassword(registrationData.password);
     try {
       const createdUser = await this.usersService.createUser({

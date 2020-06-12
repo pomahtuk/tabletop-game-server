@@ -43,17 +43,6 @@ export class User {
   public email!: string;
 
   @Column("text")
-  @Length(6, 255, {
-    message: "Must be between 6 and 255 characters long",
-  })
-  @Matches(
-    /^([a-zA-Z0-9\*\.\!\#\@\$\%\^\&\(\)\{\}\[\]\:\;\<\>\,\.\?\/\~\_\+\-\=\|\\])+$/,
-    {
-      message:
-        "Can only contain numbers, letters and symbols: * . ! # @ $ % ^ & ( ) [ ] : ; < > , . ?  ~ _ + - = | /",
-    }
-  )
-  @IsOptional()
   public password!: string;
 
   @ManyToMany(() => Game)
