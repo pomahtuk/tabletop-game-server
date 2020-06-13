@@ -1,5 +1,5 @@
 import * as bcrypt from "bcrypt";
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "http-status-codes";
+import { UNAUTHORIZED } from "http-status-codes";
 
 import { UsersService } from "./users.service";
 import { User } from "../dao/entities/user";
@@ -20,28 +20,20 @@ export class AuthService {
       throw new ValidationException("User is not valid", [pwdError]);
     }
     const hashedPassword = await hashPassword(registrationData.password);
-    try {
-      const createdUser = await this.usersService.createUser({
-        ...registrationData,
-        password: hashedPassword,
-      });
-      return AuthService.cleanUpUser(createdUser);
-    } catch (error) {
-      throw new HttpException("Something went wrong", INTERNAL_SERVER_ERROR);
-    }
+    const createdUser = await this.usersService.createUser({
+      ...registrationData,
+      password: hashedPassword,
+    });
+    return AuthService.cleanUpUser(createdUser);
   }
 
   public async getAuthenticatedUser(
     email: string,
     plainTextPassword: string
   ): Promise<User> {
-    try {
-      const user = await this.usersService.getUserByEmail(email);
-      await AuthService.verifyPassword(plainTextPassword, user.password);
-      return AuthService.cleanUpUser(user);
-    } catch (error) {
-      throw new HttpException("Wrong credentials provided", BAD_REQUEST);
-    }
+    const user = await this.usersService.getUserByEmail(email);
+    await AuthService.verifyPassword(plainTextPassword, user.password);
+    return AuthService.cleanUpUser(user);
   }
 
   private static async verifyPassword(
@@ -53,7 +45,7 @@ export class AuthService {
       hashedPassword
     );
     if (!isPasswordMatching) {
-      throw new HttpException("Wrong credentials provided", BAD_REQUEST);
+      throw new HttpException("Wrong credentials provided", UNAUTHORIZED);
     }
   }
 

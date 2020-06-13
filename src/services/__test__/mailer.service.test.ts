@@ -29,7 +29,7 @@ describe("MailerService", (): void => {
   });
 
   // TODO: Error: Greeting never received - under VPN
-  xit("Can send password reset email", async (): Promise<void> => {
+  it("Can send password reset email", async (): Promise<void> => {
     let result = await mailerService.sendResetEmail({
       username: "test",
       password: "none",
