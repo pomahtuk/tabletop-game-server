@@ -18,6 +18,7 @@ export interface MailerService {
 
 export class MailerServiceImpl implements MailerService {
   private transport: Mail;
+  private from = "Konquest Space <noreply@konquest.space>";
 
   constructor(options?: MailerServiceOptions) {
     if (options) {
@@ -30,7 +31,7 @@ export class MailerServiceImpl implements MailerService {
   public async sendResetEmail(user: User) {
     // TODO: use templates here
     return this.transport.sendMail({
-      from: "Sender Name <sender@example.com>",
+      from: this.from,
       to: user.email,
       subject: "Password reset token",
       text: `Your token to reset password is: ${user.passwordResetToken}. It will expire at ${user.passwordResetTokenExpiresAt}`,
@@ -42,7 +43,7 @@ export class MailerServiceImpl implements MailerService {
     // TODO: use templates here
     const link = `http://example.com/auth/activate/${user.activationCode}`;
     return this.transport.sendMail({
-      from: "Sender Name <sender@example.com>",
+      from: this.from,
       to: user.email,
       subject: "Activate your account",
       text: `Follow this link: ${link}`,

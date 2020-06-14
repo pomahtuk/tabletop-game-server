@@ -5,6 +5,8 @@ import * as fastifyCookie from "fastify-cookie";
 import * as formBody from "fastify-formbody";
 import * as jwt from "fastify-jwt";
 
+import { OrmConfig } from "./ormconfig";
+
 import statusRoutes from "./routes/status.routes";
 import gameRoutes from "./routes/game.routes";
 import userRoutes from "./routes/user.routes";
@@ -34,7 +36,7 @@ server.register(
         synchronize: true,
         logging: false,
       }
-    : require("../ormconfig.json")
+    : OrmConfig
 );
 server.register(websocket);
 server.register(fastifyCookie);

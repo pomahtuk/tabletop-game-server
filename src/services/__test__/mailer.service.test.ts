@@ -33,7 +33,7 @@ describe("MailerService", (): void => {
     let result = await mailerService.sendResetEmail({
       username: "test",
       password: "none",
-      email: "someone@example.com",
+      email: "pman89@ya.ru",
       passwordResetToken: "test token",
       passwordResetTokenExpiresAt: new Date(),
     });
@@ -45,7 +45,7 @@ describe("MailerService", (): void => {
     let result = await mailerService.sendActivationEmail({
       username: "test",
       password: "none",
-      email: "someone@example.com",
+      email: "pman89@ya.ru",
       activationCode: "some",
     });
 
