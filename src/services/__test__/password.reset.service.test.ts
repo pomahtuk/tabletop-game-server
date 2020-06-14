@@ -5,19 +5,7 @@ import { HttpException } from "../../exceptions/httpException";
 import { BAD_REQUEST, NOT_FOUND, UNAUTHORIZED } from "http-status-codes";
 import ValidationException from "../../exceptions/validationException";
 import { MailerService } from "../mailer.service";
-import { User } from "../../dao/entities/user";
-
-class FakeMailer implements MailerService {
-  private readonly sender: (user: User) => any;
-
-  constructor(sender: (user: User) => any) {
-    this.sender = sender;
-  }
-
-  public async sendResetEmail(user: User): Promise<any> {
-    this.sender(user);
-  }
-}
+import { FakeMailer } from "../../testhelpers/fakemailer";
 
 describe("PasswordResetService", () => {
   let usersService: UsersService;

@@ -20,6 +20,7 @@ export class User {
       this.password = newUser.password;
       this.email = newUser.email;
       this.games = newUser.games;
+      this.activationCode = newUser.activationCode;
     }
   }
 
@@ -44,6 +45,19 @@ export class User {
 
   @Column("text")
   public password!: string;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  public isActive?: boolean;
+
+  @Index()
+  @Column({
+    type: "uuid",
+    nullable: true,
+  })
+  public activationCode?: string | null;
 
   @ManyToMany(() => Game)
   @JoinTable()

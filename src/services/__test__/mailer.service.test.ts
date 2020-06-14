@@ -40,4 +40,15 @@ describe("MailerService", (): void => {
 
     expect(result).toBeDefined();
   }, 30000);
+
+  it("Can send activation email", async (): Promise<void> => {
+    let result = await mailerService.sendActivationEmail({
+      username: "test",
+      password: "none",
+      email: "someone@example.com",
+      activationCode: "some",
+    });
+
+    expect(result).toBeDefined();
+  }, 30000);
 });

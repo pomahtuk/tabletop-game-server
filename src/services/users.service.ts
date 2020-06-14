@@ -42,6 +42,17 @@ export class UsersService {
     throw new HttpException("User with this email does not exist", NOT_FOUND);
   }
 
+  public async getUserByActivationCode(activationCode: string): Promise<User> {
+    const user = await this.repo.findOne({ activationCode });
+    if (user) {
+      return user;
+    }
+    throw new HttpException(
+      "User with this activation code does not exist",
+      NOT_FOUND
+    );
+  }
+
   public deleteUser(userId: string): Promise<DeleteResult> {
     return this.repo.delete(userId);
   }

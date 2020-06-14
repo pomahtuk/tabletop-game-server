@@ -22,8 +22,8 @@ export default fp(
     next: (err?: FastifyError | undefined) => void
   ) => {
     const usersService = new UsersService();
-    const authService = new AuthService(usersService);
     const mailerService = new MailerServiceImpl();
+    const authService = new AuthService(usersService, mailerService);
     const passwordResetService = new PasswordResetService(
       usersService,
       mailerService
@@ -48,6 +48,23 @@ export default fp(
         reply: FastifyReply<ServerResponse>
       ) => {
         const user = await authService.register(req.body);
+        const token = await reply.jwtSign({ ...user });
+
+        return reply.setCookie("token", token, cookieOptions).send(user);
+      },
+    });
+
+    // user register
+    fastify.route({
+      url: "/auth/activate/:code",
+      logLevel: "warn",
+      method: ["POST", "HEAD"],
+      schema: postUserSchema,
+      handler: async (
+        req: FastifyRequest,
+        reply: FastifyReply<ServerResponse>
+      ) => {
+        const user = await authService.activateUser(req.params.code);
         const token = await reply.jwtSign({ ...user });
 
         return reply.setCookie("token", token, cookieOptions).send(user);

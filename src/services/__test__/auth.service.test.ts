@@ -5,19 +5,26 @@ import { User } from "../../dao/entities/user";
 import { HttpException } from "../../exceptions/httpException";
 import ValidationException from "../../exceptions/validationException";
 import { NOT_FOUND, UNAUTHORIZED } from "http-status-codes";
+import { FakeMailer } from "../../testhelpers/fakemailer";
+import { MailerService } from "../mailer.service";
 
 describe("UsersService", () => {
   let authService: AuthService;
   let usersService: UsersService;
+  let mailerService: MailerService;
+  let mailFakeSender = jest.fn();
 
   const TEST_EMAIL = "sample_auth_user@example.com";
   const TEST_PWD = "i_am_a_password";
   const TEST_USERNAME = "sample_auth_username";
 
+  let userActivationCode: string;
+
   beforeAll(
     async (): Promise<void> => {
       await createTestConnection();
       usersService = new UsersService();
+      mailerService = new FakeMailer(mailFakeSender);
     }
   );
 
@@ -26,7 +33,7 @@ describe("UsersService", () => {
   });
 
   it("Able to create instance of service", (): void => {
-    authService = new AuthService(new UsersService());
+    authService = new AuthService(usersService, mailerService);
     expect(authService).toBeInstanceOf(AuthService);
   });
 
@@ -42,10 +49,16 @@ describe("UsersService", () => {
     expect(newUser.password).not.toBeDefined();
     expect(newUser.username).toBe(TEST_USERNAME);
     expect(newUser.email).toBe(TEST_EMAIL);
+    expect(newUser.activationCode).toBeDefined();
+    expect(newUser.isActive).toBeFalsy();
+
+    userActivationCode = newUser.activationCode!;
 
     const dbUser = await usersService.getUserByEmail(TEST_EMAIL);
     expect(dbUser).toBeDefined();
     expect(dbUser.password).not.toBe(TEST_PWD);
+    // mail suppose to be sent
+    expect(mailFakeSender).toHaveBeenCalled();
   });
 
   it("Does not register user with existing email", async (): Promise<void> => {
@@ -92,6 +105,24 @@ describe("UsersService", () => {
       expect(error).toBeDefined();
       expect(error).toBeInstanceOf(ValidationException);
     }
+  });
+
+  it("does not authenticate not activated user", async (): Promise<void> => {
+    expect.assertions(3);
+    try {
+      await authService.getAuthenticatedUser(TEST_EMAIL, TEST_PWD);
+    } catch (error) {
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(HttpException);
+      expect(error.status).toBe(UNAUTHORIZED);
+    }
+  });
+
+  it("Able to activate user with valid code", async (): Promise<void> => {
+    const activatedUser = await authService.activateUser(userActivationCode);
+    expect(activatedUser).toBeDefined();
+    expect(activatedUser.isActive).toBeTruthy();
+    expect(activatedUser.activationCode).toBe(null);
   });
 
   it("Able to authenticate valid user/pwd pair", async (): Promise<void> => {

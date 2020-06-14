@@ -13,6 +13,7 @@ export interface MailerServiceOptions {
 
 export interface MailerService {
   sendResetEmail: (user: User) => Promise<any>;
+  sendActivationEmail: (user: User) => Promise<any>;
 }
 
 export class MailerServiceImpl implements MailerService {
@@ -34,6 +35,18 @@ export class MailerServiceImpl implements MailerService {
       subject: "Password reset token",
       text: `Your token to reset password is: ${user.passwordResetToken}. It will expire at ${user.passwordResetTokenExpiresAt}`,
       html: `Your token to reset password is: <b>${user.passwordResetToken}</b>. It will expire at <b>${user.passwordResetTokenExpiresAt}</b>.`,
+    });
+  }
+
+  public async sendActivationEmail(user: User) {
+    // TODO: use templates here
+    const link = `http://example.com/auth/activate/${user.activationCode}`;
+    return this.transport.sendMail({
+      from: "Sender Name <sender@example.com>",
+      to: user.email,
+      subject: "Activate your account",
+      text: `Follow this link: ${link}`,
+      html: `Follow this <a href="${link}">link</a> to activate your account`,
     });
   }
 

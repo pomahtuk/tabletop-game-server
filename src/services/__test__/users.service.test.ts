@@ -3,11 +3,13 @@ import createTestConnection from "../../testhelpers/createTestConnection";
 import { HttpException } from "../../exceptions/httpException";
 import ValidationException from "../../exceptions/validationException";
 import { BAD_REQUEST } from "http-status-codes";
+import { v4 } from "uuid";
 
 describe("UsersService", () => {
   let usersService: UsersService;
 
   const TEST_USER_EMAIL = "random.user.test@example.com";
+  const TEST_USER_ACTIVATION_CODE = v4();
   let testUserId: string;
 
   beforeAll(
@@ -38,12 +40,14 @@ describe("UsersService", () => {
       email: TEST_USER_EMAIL,
       username,
       password,
+      activationCode: TEST_USER_ACTIVATION_CODE,
     });
 
     expect(created).toBeDefined();
     expect(created.email).toBe(TEST_USER_EMAIL);
     expect(created.username).toBe(username);
     expect(created.password).toBe(password);
+    expect(created.activationCode).toBe(TEST_USER_ACTIVATION_CODE);
 
     testUserId = created.id as string;
   });
@@ -110,6 +114,15 @@ describe("UsersService", () => {
     const user = await usersService.getUser(testUserId);
     expect(user).toBeDefined();
     expect(user.id).toBe(testUserId);
+  });
+
+  it("Can get user by activation code", async (): Promise<void> => {
+    const user = await usersService.getUserByActivationCode(
+      TEST_USER_ACTIVATION_CODE
+    );
+    expect(user).toBeDefined();
+    expect(user.id).toBe(testUserId);
+    expect(user.activationCode).toBe(TEST_USER_ACTIVATION_CODE);
   });
 
   it("Can update user", async (): Promise<void> => {
@@ -272,6 +285,21 @@ describe("UsersService", () => {
       expect(exception).toBeDefined();
       expect(exception).toBeInstanceOf(HttpException);
       expect(exception.message).toBe("User with this email does not exist");
+    }
+  });
+
+  it("Trowing an error when user with given activationCode does not exist", async (): Promise<
+    void
+  > => {
+    expect.assertions(3);
+    try {
+      await usersService.getUserByActivationCode("111");
+    } catch (exception) {
+      expect(exception).toBeDefined();
+      expect(exception).toBeInstanceOf(HttpException);
+      expect(exception.message).toBe(
+        "User with this activation code does not exist"
+      );
     }
   });
 });
