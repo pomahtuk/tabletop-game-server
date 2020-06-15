@@ -1,11 +1,11 @@
 import * as url from "url";
 
-let type = "mysql";
-let database = "konquestdb";
-let port = "3306";
-let host = "localhost";
-let username = "root";
-let password = "177591";
+let type = "sqlite";
+let database = "db";
+let port = undefined;
+let host = undefined;
+let username = undefined;
+let password = undefined;
 
 const dbUrl = process.env.DATABASE_URL;
 if (dbUrl && dbUrl.length > 0) {
