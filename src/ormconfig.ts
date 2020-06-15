@@ -15,7 +15,7 @@ if (dbUrl && dbUrl.length > 0) {
   password = parsed.auth!.split(":")[1];
   host = parsed.host!.split(":")[0];
   database = parsed.path!.substr(1, parsed.path!.length);
-  port = parsed.port;
+  port = parsed.port!;
 }
 
 export const OrmConfig = {

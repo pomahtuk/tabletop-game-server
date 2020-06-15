@@ -1,3 +1,12 @@
 node_modules
 npm-debug.log
 db
+.vscode
+coverage
+dist
+tabletop-game-server.iml
+yarn-error.log
+.editorconfig
+.eslintcache
+.gitattributes
+.gitignore

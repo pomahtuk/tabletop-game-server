@@ -1,28 +1,26 @@
-FROM node:14
-
+FROM node:14-alpine
 LABEL maintainer="pman89@ya.ru"
 
 ARG PORT=8080
 ENV PORT ${PORT}
-
 EXPOSE ${PORT}
 
-RUN mkdir /api
-RUN groupadd -r apiuser && useradd -r -s /bin/false -g apiuser apiuser
 WORKDIR /api
 
 COPY package*.json ./
 COPY yarn.lock ./
 
-RUN yarn install --production=true --non-interactive --frozen-lockfile
+RUN apk add --no-cache --virtual .gyp python make g++ \
+    && yarn install --production=true --non-interactive --frozen-lockfile \
+    && apk del .gyp
 
 COPY . .
 
 RUN yarn build
 
-RUN chown -R apiuser:apiuser /api
+RUN chown -R node:node /api
 
-USER apiuser
+USER node
 
 CMD ["npm", "start"]
 

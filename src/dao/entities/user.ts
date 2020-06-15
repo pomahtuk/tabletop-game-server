@@ -27,7 +27,8 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   public id?: string;
 
-  @Column({ type: "text", unique: true })
+  @Index("username", { unique: true })
+  @Column({ type: "varchar", length: 255 })
   @Length(4, 255, {
     message: "Must be between 4 and 255 characters long",
   })
@@ -37,13 +38,13 @@ export class User {
   @IsOptional()
   public username!: string;
 
-  @Index()
-  @Column({ type: "text", unique: true })
+  @Index("email", { unique: true })
+  @Column({ type: "varchar", length: 255 })
   @IsEmail()
   @IsOptional()
   public email!: string;
 
-  @Column("text")
+  @Column("varchar")
   public password!: string;
 
   @Column({
