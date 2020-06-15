@@ -1,11 +1,11 @@
 import * as url from "url";
 
-let type = "sqlite";
-let database = "db";
-let port = undefined;
-let host = undefined;
-let username = undefined;
-let password = undefined;
+let type = "mysql";
+let database = "konquestdb";
+let port = "3306";
+let host = "localhost";
+let username = "root";
+let password = "177591";
 
 const dbUrl = process.env.DATABASE_URL;
 if (dbUrl && dbUrl.length > 0) {
@@ -26,7 +26,7 @@ export const OrmConfig = {
   username,
   password,
   name: "default",
-  migrationsRun: true,
+  synchronize: true,
   migrations: [__dirname + "/dao/migrations/*.{js,ts}"],
   entities: [__dirname + "/dao/entities/*.{js,ts}"],
   cli: {
