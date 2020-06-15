@@ -1,9 +1,8 @@
 FROM node:14-alpine
 LABEL maintainer="pman89@ya.ru"
 
-ARG PORT=8080
-ENV PORT ${PORT}
-EXPOSE ${PORT}
+ENV PORT 8080
+EXPOSE 8080
 
 WORKDIR /api
 
