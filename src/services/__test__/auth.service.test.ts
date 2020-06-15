@@ -71,7 +71,9 @@ describe("UsersService", () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
+      expect(error.message).toContain(
+        "User with that email or username already exists"
+      );
     }
   });
 
@@ -87,7 +89,9 @@ describe("UsersService", () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
+      expect(error.message).toContain(
+        "User with that email or username already exists"
+      );
     }
   });
 
@@ -103,17 +107,18 @@ describe("UsersService", () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(ValidationException);
+      expect(error.message).toContain(
+        "property password has failed the following constraints"
+      );
     }
   });
 
   it("does not authenticate not activated user", async (): Promise<void> => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await authService.getAuthenticatedUser(TEST_EMAIL, TEST_PWD);
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(UNAUTHORIZED);
     }
   });
@@ -135,25 +140,23 @@ describe("UsersService", () => {
   it("Able to return proper error on not found user", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await authService.getAuthenticatedUser("random.email@me.com", TEST_PWD);
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(NOT_FOUND);
     }
   });
 
-  it("Able to return proper error on not found user", async (): Promise<
+  it("Able to return proper error on incorrect password", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await authService.getAuthenticatedUser(TEST_EMAIL, "random");
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(UNAUTHORIZED);
     }
   });

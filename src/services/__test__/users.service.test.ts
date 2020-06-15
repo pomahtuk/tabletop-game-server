@@ -73,7 +73,7 @@ describe("UsersService", () => {
         password,
       });
     } catch (error) {
-      expect(error).toBeInstanceOf(HttpException);
+      expect(error).toBeDefined();
       expect(error.message).toBe(
         "User with that email or username already exists"
       );
@@ -95,7 +95,7 @@ describe("UsersService", () => {
         password,
       });
     } catch (error) {
-      expect(error).toBeInstanceOf(HttpException);
+      expect(error).toBeDefined();
       expect(error.message).toBe(
         "User with that email or username already exists"
       );
@@ -135,7 +135,7 @@ describe("UsersService", () => {
   });
 
   it("Does not allow overriding user id", async (): Promise<void> => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await usersService.updateUser(testUserId, {
         id: "some",
@@ -143,13 +143,12 @@ describe("UsersService", () => {
       });
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(HttpException);
       expect(exception.message).toBe("Changing User id is forbidden");
     }
   });
 
   it("Does not allow saving user with same email", async (): Promise<void> => {
-    expect.assertions(4);
+    expect.assertions(3);
     try {
       await usersService.saveUser({
         username: "updated111111",
@@ -158,7 +157,6 @@ describe("UsersService", () => {
       });
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(HttpException);
       expect(exception.status).toBe(BAD_REQUEST);
       expect(exception.message).toBe(
         "User with that email or username already exists"
@@ -169,7 +167,7 @@ describe("UsersService", () => {
   it("Throwing validation error when username is too short", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     const userWithShortPassword = {
       username: "srt",
       password: "hello_there_!",
@@ -179,7 +177,6 @@ describe("UsersService", () => {
       await usersService.createUser(userWithShortPassword);
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(ValidationException);
       expect(exception.message).toContain(
         "Must be between 4 and 255 characters long"
       );
@@ -189,7 +186,7 @@ describe("UsersService", () => {
   it("Throwing validation error when username does not match regex", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     const userWithShortPassword = {
       username: "hello there",
       password: "hello_there_!",
@@ -199,7 +196,6 @@ describe("UsersService", () => {
       await usersService.createUser(userWithShortPassword);
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(ValidationException);
       expect(exception.message).toContain(
         "Can only contain numbers, letters and symbols"
       );
@@ -219,7 +215,7 @@ describe("UsersService", () => {
   it("Returns error when setting user email to already existing one", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     const user = await usersService.createUser({
       email: "non_existent@example.com",
       username: "new_test_user",
@@ -231,7 +227,6 @@ describe("UsersService", () => {
       });
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(HttpException);
       expect(exception.message).toBe(
         "User with that email or username already exists"
       );
@@ -242,7 +237,7 @@ describe("UsersService", () => {
   it("Returns error when setting user username to already existing one", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     const user = await usersService.createUser({
       email: "non_existent1@example.com",
       username: "new_test_user1",
@@ -254,7 +249,6 @@ describe("UsersService", () => {
       });
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(HttpException);
       expect(exception.message).toBe(
         "User with that email or username already exists"
       );
@@ -265,12 +259,11 @@ describe("UsersService", () => {
   it("Throwing error when user with given id does not exist", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await usersService.getUser("111");
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(HttpException);
       expect(exception.message).toBe("User with this id does not exist");
     }
   });
@@ -278,12 +271,11 @@ describe("UsersService", () => {
   it("Throwing error when user with given email does not exist", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await usersService.getUserByEmail("111");
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(HttpException);
       expect(exception.message).toBe("User with this email does not exist");
     }
   });
@@ -291,12 +283,11 @@ describe("UsersService", () => {
   it("Trowing an error when user with given activationCode does not exist", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await usersService.getUserByActivationCode("111");
     } catch (exception) {
       expect(exception).toBeDefined();
-      expect(exception).toBeInstanceOf(HttpException);
       expect(exception.message).toBe(
         "User with this activation code does not exist"
       );

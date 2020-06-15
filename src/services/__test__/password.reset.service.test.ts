@@ -56,7 +56,7 @@ describe("PasswordResetService", () => {
   it("Would not reset password when password does not pass validation", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     const { passwordResetToken } = await usersService.getUserByEmail(
       TEST_USER_EMAIL
     );
@@ -68,7 +68,6 @@ describe("PasswordResetService", () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(ValidationException);
       expect(error.status).toBe(BAD_REQUEST);
     }
   });
@@ -93,7 +92,7 @@ describe("PasswordResetService", () => {
   it("Would not reset password when flow not initiated or completed or token invalid", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await passwordResetService.resetPassword({
         email: TEST_USER_EMAIL,
@@ -102,7 +101,6 @@ describe("PasswordResetService", () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(UNAUTHORIZED);
     }
   });
@@ -115,7 +113,7 @@ describe("PasswordResetService", () => {
     user.passwordResetTokenExpiresAt = new Date();
     await usersService.saveUser(user);
 
-    expect.assertions(4);
+    expect.assertions(3);
     try {
       await passwordResetService.resetPassword({
         email: TEST_USER_EMAIL,
@@ -124,7 +122,6 @@ describe("PasswordResetService", () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(UNAUTHORIZED);
       expect(error.message).toBe("Password reset token expired.");
     }
@@ -133,7 +130,7 @@ describe("PasswordResetService", () => {
   it("Would not start procedure for non-existing user", async (): Promise<
     void
   > => {
-    expect.assertions(3);
+    expect.assertions(2);
     try {
       await passwordResetService.resetPassword({
         email: "some@email.com",
@@ -142,7 +139,6 @@ describe("PasswordResetService", () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(NOT_FOUND);
     }
   });
