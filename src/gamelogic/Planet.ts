@@ -1,6 +1,4 @@
-// import * as randomColor from "randomcolor";
-
-const randomColor = (params: any) => "";
+import randomColor from "randomcolor";
 
 import Player from "./Player";
 

@@ -1,4 +1,4 @@
-import * as url from "url";
+import url from "url";
 
 let type = "sqlite";
 let database = "db";

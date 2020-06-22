@@ -4,7 +4,7 @@ import {
   passwordSizeMessage,
   validatePassword,
 } from "../password";
-import * as crypto from "crypto";
+import crypto from "crypto";
 
 describe("Password helpers", (): void => {
   it("Exports hashing function", (): void => {

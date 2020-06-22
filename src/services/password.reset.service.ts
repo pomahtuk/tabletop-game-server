@@ -1,5 +1,5 @@
 import { UsersService } from "./users.service";
-import * as crypto from "crypto";
+import crypto from "crypto";
 import { hashPassword, validatePassword } from "../helpres/password";
 import { HttpException } from "../exceptions/httpException";
 import { UNAUTHORIZED } from "http-status-codes";

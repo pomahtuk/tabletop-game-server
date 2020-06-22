@@ -1,4 +1,4 @@
-import * as bcrypt from "bcrypt";
+import bcrypt from "bcrypt";
 import validator from "validator";
 import { ValidationError } from "class-validator/types/validation/ValidationError";
 

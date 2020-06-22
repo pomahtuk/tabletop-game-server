@@ -1,5 +1,5 @@
 import { MailerService, MailerServiceImpl } from "../mailer.service";
-import * as nodemailer from "nodemailer";
+import nodemailer from "nodemailer";
 
 describe("MailerService", (): void => {
   let mailerService: MailerService;

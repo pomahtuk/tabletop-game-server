@@ -1,9 +1,9 @@
-import * as fastify from "fastify";
-import * as helmet from "fastify-helmet";
-import * as websocket from "fastify-websocket";
-import * as fastifyCookie from "fastify-cookie";
-import * as formBody from "fastify-formbody";
-import * as jwt from "fastify-jwt";
+import fastify from "fastify";
+import helmet from "fastify-helmet";
+import websocket from "fastify-websocket";
+import fastifyCookie from "fastify-cookie";
+import formBody from "fastify-formbody";
+import jwt from "fastify-jwt";
 
 import { OrmConfig } from "./ormconfig";
 

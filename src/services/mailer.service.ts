@@ -1,6 +1,6 @@
 import { User } from "../dao/entities/user";
-import * as nodemailer from "nodemailer";
-import * as Mail from "nodemailer/lib/mailer";
+import nodemailer from "nodemailer";
+import Mail from "nodemailer/lib/mailer";
 
 export interface MailerServiceOptions {
   host: string;
