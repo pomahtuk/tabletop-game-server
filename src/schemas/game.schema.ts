@@ -2,10 +2,12 @@ import { UserSchema } from "./user.schema";
 
 export const GameSchema: any = {
   id: { type: "string", format: "uuid" },
-  status: { type: "string", enum: ["not_started", "in_progress", "finished"] },
+  isPublic: { type: "boolean" },
+  numPlayers: { type: "integer" },
+  fieldWidth: { type: "integer" },
+  fieldHeight: { type: "integer" },
+  gameStarted: { type: "boolean" },
   users: { type: "array", items: { properties: UserSchema } },
-  created_at: { type: "string", format: "date-time" },
-  updated_at: { type: "string", format: "date-time" },
 };
 
 export const listGamesSchema = {
@@ -42,6 +44,16 @@ export const putGameSchema = {
     required: ["users"],
     properties: GameSchema,
   },
+  response: {
+    200: {
+      type: "object",
+      properties: GameSchema,
+    },
+  },
+};
+
+export const getGameSchema = {
+  summary: "get game",
   response: {
     200: {
       type: "object",

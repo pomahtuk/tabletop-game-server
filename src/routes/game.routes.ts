@@ -4,6 +4,7 @@ import {
   listGamesSchema,
   postGameSchema,
   putGameSchema,
+  getGameSchema,
 } from "../schemas/game.schema";
 import {
   FastifyRequest,
@@ -42,11 +43,12 @@ export default fp(
       url: "/game/:gameId",
       logLevel: "warn",
       method: ["GET", "HEAD"],
+      schema: getGameSchema,
       handler: async (
         request: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        const game = gameService.getGame(request.params.gameId);
+        const game = await gameService.getGame(request.params.gameId);
         return reply.send(game);
       },
     });
@@ -61,7 +63,7 @@ export default fp(
         request: FastifyRequest,
         reply: FastifyReply<ServerResponse>
       ) => {
-        const game = gameService.createGame(request.body);
+        const game = await gameService.createGame(request.body);
         return reply.send(game);
       },
     });

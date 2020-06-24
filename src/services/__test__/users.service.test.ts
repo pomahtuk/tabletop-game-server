@@ -1,7 +1,5 @@
 import { UsersService } from "../users.service";
 import createTestConnection from "../../testhelpers/createTestConnection";
-import { HttpException } from "../../exceptions/httpException";
-import ValidationException from "../../exceptions/validationException";
 import { BAD_REQUEST } from "http-status-codes";
 import { v4 } from "uuid";
 

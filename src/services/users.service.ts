@@ -18,9 +18,12 @@ export class UsersService {
     this.repo = getRepository(User);
   }
 
-  public getUsers(): Promise<User[]> {
+  public getUsers(page: number = 0, limit: number = 10): Promise<User[]> {
     return this.repo.find({
       relations: ["games"],
+      skip: page * limit,
+      take: limit,
+      cache: true,
     });
   }
 

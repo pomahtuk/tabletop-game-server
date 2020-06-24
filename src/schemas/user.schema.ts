@@ -5,8 +5,6 @@ export const UserSchema = {
   username: { type: "string" },
   email: { type: "string" },
   games: { type: "array", items: { properties: GameSchema } },
-  created_at: { type: "string", format: "date-time" },
-  updated_at: { type: "string", format: "date-time" },
 };
 
 export const listUsersSchema = {

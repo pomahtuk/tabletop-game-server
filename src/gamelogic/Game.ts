@@ -40,25 +40,14 @@ export enum TurnStatus {
   "INVALID" = "invalid",
 }
 
-export type GamePersister = (serializedGame: string) => void;
-
 // making fields truly private
-const addPlayers = Symbol("addPlayers");
-const addNeutralPlanets = Symbol("addNeutralPlanets");
-const processTurn = Symbol("processTurn");
 const fleetTimeline = Symbol("fleetTimeline");
 const waitingForPlayer = Symbol("waitingForPlayer");
-const players = Symbol("players");
 const planets = Symbol("planets");
 const planetCount = Symbol("planetCount");
-const fieldHeight = Symbol("fieldHeight");
-const fieldWidth = Symbol("fieldWidth");
 const turns = Symbol("turns");
 const status = Symbol("status");
 const winner = Symbol("winner");
-const findWinner = Symbol("findWinner");
-const findNextValidPlayer = Symbol("findNextValidPlayer");
-const addDataToTurn = Symbol("addDataToTurn");
 
 const SymbolMapForSerializer = {
   planets: planets,
@@ -84,17 +73,16 @@ class ConquestGame {
   public static minPlayers = 2;
   public static maxPlayers = 4;
 
-  private [fieldHeight]: number;
-  private [fieldWidth]: number;
+  #players: Player[] = [];
+  readonly #fieldHeight: number;
+  readonly #fieldWidth: number;
   private [turns]: PlayerTurn[] = [];
   private [planets]: PlanetMap = {};
-  private [players]: Player[] = [];
   private [planetCount] = 0;
   private [waitingForPlayer] = -1;
   private [fleetTimeline]: Fleet[][] = [];
   private [status]: GameStatus = GameStatus.NOT_STARTED;
   private [winner]: Player | null = null;
-  private persister?: GamePersister;
 
   public get waitingForPlayer(): number {
     return this[waitingForPlayer];
@@ -109,18 +97,15 @@ class ConquestGame {
   }
 
   public get fieldSize(): [number, number] {
-    return [this[fieldHeight], this[fieldWidth]];
+    return [this.#fieldHeight, this.#fieldWidth];
   }
 
-  public constructor(
-    {
-      fieldHeight: height,
-      fieldWidth: width,
-      neutralPlanetCount,
-      players: newPlayers,
-    }: GameOptions,
-    persister?: GamePersister
-  ) {
+  public constructor({
+    fieldHeight: height,
+    fieldWidth: width,
+    neutralPlanetCount,
+    players: newPlayers,
+  }: GameOptions) {
     const result = validateGameParams({
       fieldHeight: height,
       fieldWidth: width,
@@ -132,32 +117,25 @@ class ConquestGame {
       throw new Error(result.error);
     }
 
-    this[fieldHeight] = height;
-    this[fieldWidth] = width;
+    this.#fieldHeight = height;
+    this.#fieldWidth = width;
     // create game field
     // get players in easy way
-    this[addPlayers](newPlayers);
+    this.addPlayers(newPlayers);
     // add neutral planets
-    this[addNeutralPlanets](neutralPlanetCount, newPlayers.length);
+    this.addNeutralPlanets(neutralPlanetCount, newPlayers.length);
     // place planets
     placePlanets({
       planets: this[planets],
-      fieldHeight: this[fieldHeight],
-      fieldWidth: this[fieldWidth],
+      fieldHeight: this.#fieldHeight,
+      fieldWidth: this.#fieldWidth,
       planetCount: this[planetCount],
     });
     // we start from negative to make sure that when firs player is computer we are able to have a game
-    this[findNextValidPlayer]();
-    this.persister = persister;
-    if (this.persister) {
-      this.persister(this.serialize());
-    }
+    this.findNextValidPlayer();
   }
 
-  public static deSerialize(
-    serializedGame: string,
-    persister?: GamePersister
-  ): ConquestGame | undefined {
+  public static deSerialize(serializedGame: string): ConquestGame | undefined {
     const {
       gameOptions,
       gameData,
@@ -212,13 +190,12 @@ class ConquestGame {
             (acc: Fleet[][], fleets: SerializedFleet[]): Fleet[][] => {
               const newFleets: Fleet[] = fleets.map(
                 (fleet: SerializedFleet) => {
-                  const newFleet = new Fleet({
+                  return new Fleet({
                     owner: playersMap.get(fleet.ownerId) as Player,
                     killPercent: fleet.killPercent,
                     amount: fleet.amount,
                     destination: fleet.destination,
                   });
-                  return newFleet;
                 }
               );
               acc.push(newFleets);
@@ -234,9 +211,6 @@ class ConquestGame {
       game[SymbolMapForSerializer[dataKey]] = data;
     });
 
-    // only add persister once restored
-    game.persister = persister;
-
     return game;
   }
 
@@ -246,7 +220,7 @@ class ConquestGame {
       return TurnStatus.IGNORED;
     }
     const { player } = data;
-    const playerWeAreWaitingFor = this[players][this[waitingForPlayer]];
+    const playerWeAreWaitingFor = this.#players[this[waitingForPlayer]];
     if (player.id !== playerWeAreWaitingFor.id) {
       return TurnStatus.INVALID;
     }
@@ -260,18 +234,15 @@ class ConquestGame {
       this[status] = GameStatus.IN_PROGRESS;
     }
     // check if we already have some data for this turn
-    this[addDataToTurn](data);
+    this.addDataToTurn(data);
     // update pointer to player we are waiting for
-    this[findNextValidPlayer]();
-    if (this.persister) {
-      this.persister(this.serialize());
-    }
+    this.findNextValidPlayer();
     return TurnStatus.VALID;
   }
 
   public getPlayers(): Player[] {
     // returning deep copy of an object to prevent modification by pointer
-    return JSON.parse(JSON.stringify(this[players]));
+    return JSON.parse(JSON.stringify(this.#players));
   }
 
   public getPlanets(): PlanetMap {
@@ -290,10 +261,10 @@ class ConquestGame {
 
   public serialize(): string {
     const gameOptions: GameOptions = {
-      fieldHeight: this[fieldHeight],
-      fieldWidth: this[fieldWidth],
-      neutralPlanetCount: this[planetCount] - this[players].length,
-      players: this[players],
+      fieldHeight: this.#fieldHeight,
+      fieldWidth: this.#fieldWidth,
+      neutralPlanetCount: this[planetCount] - this.#players.length,
+      players: this.#players,
     };
     const gameData: GameData = {
       planets: Object.keys(this[planets]).reduce(
@@ -335,23 +306,23 @@ class ConquestGame {
     return JSON.stringify({ gameOptions, gameData });
   }
 
-  private [addDataToTurn](data: PlayerTurn): void {
+  private addDataToTurn(data: PlayerTurn): void {
     // check if we already have some data for this turn
     const turn = this[turns];
     turn.push(data);
   }
 
-  private [findNextValidPlayer](): void {
+  private findNextValidPlayer(): void {
     this[waitingForPlayer] += 1;
-    if (this[waitingForPlayer] >= this[players].length) {
+    if (this[waitingForPlayer] >= this.#players.length) {
       // if we made full circle - start anew
       this[waitingForPlayer] = 0;
       // and process current turn
-      this[processTurn]();
+      this.processTurn();
     }
-    const nextPlayer = this[players][this[waitingForPlayer]];
+    const nextPlayer = this.#players[this[waitingForPlayer]];
     if (nextPlayer.isDead) {
-      this[findNextValidPlayer]();
+      this.findNextValidPlayer();
     }
     // moving computer turn processing here for now, but make sure not to make a turn once game completed
     if (nextPlayer.isComputer && this[status] !== GameStatus.COMPLETED) {
@@ -359,15 +330,15 @@ class ConquestGame {
         this[planets],
         findPlayerFleets(this[fleetTimeline], nextPlayer)
       );
-      this[addDataToTurn]({
+      this.addDataToTurn({
         player: nextPlayer,
         orders,
       });
-      this[findNextValidPlayer]();
+      this.findNextValidPlayer();
     }
   }
 
-  private [processTurn](): void {
+  private processTurn(): void {
     // send fleets
     const currentTurns = this[turns];
     for (const turn of currentTurns) {
@@ -417,7 +388,7 @@ class ConquestGame {
     );
     // mark dead players
     markDeadPlayers({
-      players: this[players],
+      players: this.#players,
       planets: this[planets],
       remainingTimeline: this[fleetTimeline],
     });
@@ -426,12 +397,12 @@ class ConquestGame {
     this[turns] = [];
 
     // check if someone won
-    this[findWinner]();
+    this.findWinner();
   }
 
-  private [findWinner](): void {
+  private findWinner(): void {
     // may be check if all planets are captured?
-    const alivePlayers = this[players].filter(
+    const alivePlayers = this.#players.filter(
       (player): boolean => !player.isDead
     );
     // if we have exactly 1 alive player
@@ -450,8 +421,8 @@ class ConquestGame {
     }
   }
 
-  private [addPlayers](newPlayers: Player[]): void {
-    this[players] = newPlayers;
+  private addPlayers(newPlayers: Player[]): void {
+    this.#players = newPlayers;
     // generate player planets
     newPlayers.forEach((player, index): void => {
       const playerPlanet = new Planet(getPlanetName(index), player);
@@ -459,7 +430,7 @@ class ConquestGame {
     });
   }
 
-  private [addNeutralPlanets](
+  private addNeutralPlanets(
     neutralPlanetCount: number,
     playersCount: number
   ): void {

@@ -1,7 +1,6 @@
 import ConquestGame from "../../Game";
 import Player, { PlayerTurnOrder } from "../../Player";
 import getPlanetName from "../../helpers/getPlanetName";
-import exp = require("constants");
 
 const player1 = new Player("player1");
 const player2 = new Player("player2");
@@ -110,30 +109,6 @@ describe("Main game", (): void => {
     expect(planetsBefore).toMatchObject(planetsAfter);
     expect(playersBefore).toMatchObject(playersAfter);
     expect(fleetsBefore).toMatchObject(fleetsAfter);
-  });
-
-  it("Creates a new game with persister provided", (): void => {
-    const persister = jest.fn();
-    const game = new ConquestGame(
-      {
-        fieldHeight: 10,
-        fieldWidth: 10,
-        neutralPlanetCount: 5,
-        players: [player1, player2],
-      },
-      persister
-    );
-
-    expect(game).toBeDefined();
-
-    const serializedGame = game.serialize();
-    expect(persister).toHaveBeenCalledWith(serializedGame);
-    game.addPlayerTurnData({
-      player: player1,
-      orders: [],
-    });
-    const newSerializedGame = game.serialize();
-    expect(persister).toHaveBeenCalledWith(newSerializedGame);
   });
 
   it("Trows error when passing invalid params", (): void => {

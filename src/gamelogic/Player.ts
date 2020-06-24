@@ -28,8 +28,8 @@ export default class Player {
   public isDead = false;
   public isComputer = false;
 
-  public constructor(name: string) {
-    this.id = uuid().split("-")[0];
+  public constructor(id: string = uuid(), name: string) {
+    this.id = id;
     this.screenName = name;
     this.statEnemyShipsDestroyed = 0;
     this.statEnemyFleetsDestroyed = 0;
