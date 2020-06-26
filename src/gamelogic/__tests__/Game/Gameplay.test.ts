@@ -1,8 +1,8 @@
 import ConquestGame, { GameStatus, TurnStatus } from "../../Game";
 import Player from "../../Player";
 
-const player1 = new Player("player1");
-const player2 = new Player("player2");
+const player1 = new Player(undefined, "player1");
+const player2 = new Player(undefined, "player2");
 
 const makeIdlePlayer1Turn = (game: ConquestGame): void => {
   game.addPlayerTurnData({
@@ -99,7 +99,7 @@ describe("Could have a game", (): void => {
     makeIdlePlayer1Turn(game);
     makeIdlePlayer2Turn(game);
     // let player 1 capture neutral planet
-    const availableAttackFleet = game.getPlanets()["A"].ships;
+    const availableAttackFleet = game.planets["A"].ships;
     game.addPlayerTurnData({
       player: player1,
       orders: [
@@ -119,11 +119,9 @@ describe("Could have a game", (): void => {
     // done waiting, combine fleets
     // find best planet to use
     const combinePlanet =
-      game.getPlanets()["A"].killPercent > game.getPlanets()["C"].killPercent
-        ? "A"
-        : "C";
+      game.planets["A"].killPercent > game.planets["C"].killPercent ? "A" : "C";
     const sourcePlanet = combinePlanet === "A" ? "C" : "A";
-    let availableFleetAtSource = game.getPlanets()[sourcePlanet].ships;
+    let availableFleetAtSource = game.planets[sourcePlanet].ships;
     game.addPlayerTurnData({
       player: player1,
       orders: [
@@ -136,8 +134,8 @@ describe("Could have a game", (): void => {
     });
     makeIdlePlayer2Turn(game);
     // at this point turn processed and we have combined fleet at planet C
-    const availableFleetAtDestination = game.getPlanets()[combinePlanet].ships;
-    availableFleetAtSource = game.getPlanets()[sourcePlanet].ships;
+    const availableFleetAtDestination = game.planets[combinePlanet].ships;
+    availableFleetAtSource = game.planets[sourcePlanet].ships;
     game.addPlayerTurnData({
       player: player1,
       orders: [
@@ -156,7 +154,7 @@ describe("Could have a game", (): void => {
     makeIdlePlayer2Turn(game);
     // now game processed another turn
     // check if there are any fleets en route
-    const fleets = game.getFleets();
+    const fleets = game.fleetTimeline;
     const fleetsTravelling = fleets.reduce((acc, fleetData) => {
       return [...acc, ...fleetData];
     }, []);
@@ -168,8 +166,7 @@ describe("Could have a game", (): void => {
     // we should know the winner
     expect(game.status).toBe(GameStatus.COMPLETED);
     expect(game.winner).toBeDefined();
-    // @ts-ignore
-    expect(game.winner.id).toBe(player1.id);
+    expect(game.winner!.id).toBe(player1.id);
   });
 
   // now game should not accept new turns

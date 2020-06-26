@@ -4,7 +4,7 @@ import Player from "../Player";
 describe("Fleet", (): void => {
   it("Creates a new Fleet", (): void => {
     const playerName = "Tester";
-    const player = new Player(playerName);
+    const player = new Player(undefined, playerName);
 
     const fleet = new Fleet({
       owner: player,

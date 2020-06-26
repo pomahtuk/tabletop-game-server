@@ -2,6 +2,7 @@ import Player, { PlayerTurnOrder } from "./Player";
 import Fleet from "./Fleet";
 import Planet, { PlanetMap } from "./Planet";
 import getDistanceBetweenPoints from "./helpers/getDistanceBetweenPoints";
+import { v4 as uuid } from "uuid";
 
 export enum ComputerPlayerType {
   EASY = "easy",
@@ -14,8 +15,8 @@ class ComputerPlayer extends Player {
   protected minimumShips = 20;
   protected shipCountFactor = 2;
 
-  constructor(name: string, type: ComputerPlayerType) {
-    super(name);
+  constructor(id: string = uuid(), name: string, type: ComputerPlayerType) {
+    super(id, name);
     this.isComputer = true;
     this.computerType = type;
   }

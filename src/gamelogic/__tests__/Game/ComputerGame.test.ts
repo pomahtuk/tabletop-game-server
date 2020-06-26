@@ -9,8 +9,8 @@ import { PlanetMap } from "../../Planet";
 import ComputerPlayerHard from "../../ComputerPlayerHard";
 import Fleet from "../../Fleet";
 
-const computer = new ComputerPlayerEasy("test");
-const player = new Player("gamer");
+const computer = new ComputerPlayerEasy(undefined, "test");
+const player = new Player(undefined, "gamer");
 
 const makeEmptyPlayerTurn = (game: ConquestGame): TurnStatus => {
   return game.addPlayerTurnData({
@@ -61,7 +61,7 @@ describe("Could have a game with Computer player", (): void => {
   });
 
   it("Can stop game if only computer players are left", (): void => {
-    const anotherComp = new ComputerPlayerHard("another");
+    const anotherComp = new ComputerPlayerHard(undefined, "another");
     const ownGame = new ConquestGame({
       players: [anotherComp, computer],
       fieldHeight: 4,
@@ -84,7 +84,7 @@ describe("Could have a game with Computer player", (): void => {
       makeEmptyPlayerTurn(game);
     }
     // after this neutral planet should belong to Computer player
-    const planets: PlanetMap = game.getPlanets();
+    const planets: PlanetMap = game.planets;
     const computerPlanets = Object.keys(planets)
       .map((planetName) => planets[planetName])
       .filter((planet) => planet.owner && planet.owner.id === computer.id);
@@ -127,7 +127,7 @@ describe("Could have a game with Computer player", (): void => {
 
     // now game processed another turn
     // check if there are any fleets en route
-    const fleets = game.getFleets();
+    const fleets = game.fleetTimeline;
     const fleetsTravelling = fleets.reduce((acc, fleetData) => {
       return [...acc, ...fleetData];
     }, []);

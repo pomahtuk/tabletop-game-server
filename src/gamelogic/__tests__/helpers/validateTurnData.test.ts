@@ -3,7 +3,7 @@ import validateTurnData from "../../helpers/validateTurnData";
 import Planet, { PlanetMap } from "../../Planet";
 import Player from "../../Player";
 
-const player1 = new Player("player1");
+const player1 = new Player(undefined, "player1");
 
 const planets: PlanetMap = {
   A: new Planet("A", player1),

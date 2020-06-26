@@ -14,11 +14,6 @@ export interface PlayerTurn {
   orders: PlayerTurnOrder[];
 }
 
-export interface SerializedPlayerTurn {
-  playerId: string;
-  orders: PlayerTurnOrder[];
-}
-
 export default class Player {
   public id: string;
   public screenName: string;

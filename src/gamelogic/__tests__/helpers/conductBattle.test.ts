@@ -7,7 +7,7 @@ import conductBattle from "../../helpers/conductBattle";
 
 describe("conductBattle", (): void => {
   it("Able to conduct simple battle with attacker as a clear winner", (): void => {
-    const player1 = new Player("One");
+    const player1 = new Player(undefined, "One");
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 100,
@@ -28,7 +28,7 @@ describe("conductBattle", (): void => {
   });
 
   it("Able to conduct simple battle with defender as a clear winner", (): void => {
-    const player1 = new Player("One");
+    const player1 = new Player(undefined, "One");
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 1,
@@ -47,8 +47,8 @@ describe("conductBattle", (): void => {
   });
 
   it("Able to conquer planet from other player", (): void => {
-    const player1 = new Player("One");
-    const player2 = new Player("Two");
+    const player1 = new Player(undefined, "One");
+    const player2 = new Player(undefined, "Two");
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 30,
@@ -67,8 +67,8 @@ describe("conductBattle", (): void => {
   });
 
   it("Able to hold player planet against attack", (): void => {
-    const player1 = new Player("One");
-    const player2 = new Player("Two");
+    const player1 = new Player(undefined, "One");
+    const player2 = new Player(undefined, "Two");
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 3,

@@ -6,10 +6,15 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from "typeorm";
 
 import { User } from "./user";
 import { IsBoolean, Min, Max, IsOptional, Length } from "class-validator";
+import Planet, { PlanetMap } from "../../gamelogic/Planet";
+import Fleet from "../../gamelogic/Fleet";
+import Player, { PlayerTurn } from "../../gamelogic/Player";
 
 // Game with bots should be possible
 
@@ -24,6 +29,12 @@ export class Game {
       this.gameStarted = gameData.gameStarted;
       this.fieldWidth = gameData.fieldWidth;
       this.fieldHeight = gameData.fieldHeight;
+      this.waitingForPlayer = gameData.waitingForPlayer;
+      this.winner = gameData.winner;
+      this.planets = gameData.planets;
+      this.fleetTimeline = gameData.fleetTimeline;
+      this.turns = gameData.turns;
+      this.players = gameData.players;
     }
   }
 
@@ -96,6 +107,39 @@ export class Game {
   @IsOptional()
   @IsBoolean()
   public gameStarted?: boolean;
+
+  @Column({
+    type: "boolean",
+    nullable: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  public gameCompleted?: boolean;
+
+  @Column({
+    type: "int",
+    nullable: false,
+    default: -1,
+  })
+  public waitingForPlayer?: number;
+
+  @OneToOne((type) => User)
+  @JoinColumn()
+  public winner?: User;
+
+  // TODO: may be switch to proper JSON?
+  @Column("simple-json")
+  public players?: Player[];
+
+  @Column("simple-json")
+  public planets?: PlanetMap;
+
+  @Column("simple-json")
+  public fleetTimeline?: Fleet[][];
+
+  @Column("simple-json")
+  public turns?: PlayerTurn[];
 
   // Technical info
   @CreateDateColumn()

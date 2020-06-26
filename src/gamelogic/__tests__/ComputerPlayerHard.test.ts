@@ -8,14 +8,14 @@ describe("ComputerPlayerHard", (): void => {
   });
 
   it("Able to create instance of ComputerPlayerHard", (): void => {
-    const computer = new ComputerPlayerHard("test");
+    const computer = new ComputerPlayerHard(undefined, "test");
     expect(computer).toBeDefined();
     expect(computer.isComputer).toBeTruthy();
     expect(computer.computerType).toBe(ComputerPlayerType.HARD);
   });
 
   it("Can prepare turn data for attack", (): void => {
-    const computer = new ComputerPlayerHard("test");
+    const computer = new ComputerPlayerHard(undefined, "test");
     const planets = {
       A: new Planet("A", computer, { x: 0, y: 0 }),
       B: new Planet("B", null, { x: 1, y: 1 }),
@@ -27,7 +27,7 @@ describe("ComputerPlayerHard", (): void => {
   });
 
   it("Can prepare turn data for reinforcements", (): void => {
-    const computer = new ComputerPlayerHard("test");
+    const computer = new ComputerPlayerHard(undefined, "test");
     const planets = {
       A: new Planet("A", computer, { x: 0, y: 0 }),
       B: new Planet("B", computer, { x: 1, y: 1 }),

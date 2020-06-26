@@ -7,14 +7,22 @@ describe("ComputerPlayer", (): void => {
   });
 
   it("Able to create instance of ComputerPlayer", (): void => {
-    const computer = new ComputerPlayer("test", ComputerPlayerType.EASY);
+    const computer = new ComputerPlayer(
+      undefined,
+      "test",
+      ComputerPlayerType.EASY
+    );
     expect(computer).toBeDefined();
     expect(computer.isComputer).toBeTruthy();
     expect(computer.computerType).toBe(ComputerPlayerType.EASY);
   });
 
   it("Can properly calculate if planet should not be considered as destination for turn", (): void => {
-    const computer = new ComputerPlayer("test", ComputerPlayerType.EASY);
+    const computer = new ComputerPlayer(
+      undefined,
+      "test",
+      ComputerPlayerType.EASY
+    );
     const shouldNot = computer.shouldSkipPlanet("A", [], []);
     expect(shouldNot).toBe(false);
     const shouldDueToOrders = computer.shouldSkipPlanet(
@@ -38,12 +46,20 @@ describe("ComputerPlayer", (): void => {
   });
 
   it("Can prepare turn data", (): void => {
-    const computer = new ComputerPlayer("test", ComputerPlayerType.EASY);
+    const computer = new ComputerPlayer(
+      undefined,
+      "test",
+      ComputerPlayerType.EASY
+    );
     expect(computer.takeTurn({}, [])).toHaveLength(0);
   });
 
   it("Can prepare turn data when there is a planet to skip in data due to sent fleets", (): void => {
-    const computer = new ComputerPlayer("test", ComputerPlayerType.EASY);
+    const computer = new ComputerPlayer(
+      undefined,
+      "test",
+      ComputerPlayerType.EASY
+    );
     const planetC = new Planet("C", computer, { x: 0, y: 0 });
     planetC.ships = 100;
     const planetA = new Planet("A", null, { x: 0, y: 0 });
@@ -61,7 +77,11 @@ describe("ComputerPlayer", (): void => {
   });
 
   it("Can prepare turn data when there is a planet to skip in data due to sent fleets", (): void => {
-    const computer = new ComputerPlayer("test", ComputerPlayerType.EASY);
+    const computer = new ComputerPlayer(
+      undefined,
+      "test",
+      ComputerPlayerType.EASY
+    );
     const planetC = new Planet("C", computer, { x: 0, y: 0 });
     planetC.ships = 100;
     const planetD = new Planet("D", computer, { x: 0, y: 0 });

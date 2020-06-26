@@ -3,7 +3,7 @@ import Player from "../Player";
 describe("Player", (): void => {
   it("Creates a new Player", (): void => {
     const playerName = "Tester";
-    const player = new Player(playerName);
+    const player = new Player(undefined, playerName);
 
     expect(player).toBeDefined();
 
@@ -15,7 +15,7 @@ describe("Player", (): void => {
   });
 
   it("Exposes takeTurn mock function returning an empty array", (): void => {
-    const player = new Player("test");
+    const player = new Player(undefined, "test");
     expect(player.takeTurn({}, [])).toHaveLength(0);
   });
 });

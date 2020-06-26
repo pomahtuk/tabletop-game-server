@@ -2,15 +2,8 @@ import ConquestGame from "../../Game";
 import Player, { PlayerTurnOrder } from "../../Player";
 import getPlanetName from "../../helpers/getPlanetName";
 
-const player1 = new Player("player1");
-const player2 = new Player("player2");
-
-const generateMaxOrders = (startPlanetIndex: number): PlayerTurnOrder[] =>
-  [...Array(10)].map((_, index) => ({
-    origin: getPlanetName(startPlanetIndex),
-    destination: getPlanetName(startPlanetIndex + index + 1),
-    amount: 1,
-  }));
+const player1 = new Player(undefined, "player1");
+const player2 = new Player(undefined, "player2");
 
 describe("Main game", (): void => {
   it("Exposing maximum and minimum parameters", (): void => {
@@ -33,7 +26,7 @@ describe("Main game", (): void => {
 
     // get data
     const players = game.getPlayers();
-    const planets = game.getPlanets();
+    const planets = game.planets;
 
     // check we have all players
     expect(players).toBeDefined();
@@ -46,7 +39,7 @@ describe("Main game", (): void => {
     expect(planets["B"].coordinates).toBeDefined();
 
     // now make sure we don't have turns from start
-    expect(game.getTurns().length).toBe(0);
+    expect(game.turns.length).toBe(0);
   });
 
   it("Creates a new game with given params and exposing fieldSize", (): void => {
@@ -61,69 +54,8 @@ describe("Main game", (): void => {
     expect(game.fieldSize).toMatchObject([10, 10]);
   });
 
-  it("Can serialize and de-serialize game", (): void => {
-    const player3 = new Player("player3");
-    const player4 = new Player("player4");
-    const originalGame = new ConquestGame({
-      fieldHeight: 20,
-      fieldWidth: 20,
-      neutralPlanetCount: 22,
-      players: [player1, player2, player3, player4],
-    });
-    // create some turns
-    originalGame.addPlayerTurnData({
-      player: player1,
-      orders: generateMaxOrders(0),
-    });
-    originalGame.addPlayerTurnData({
-      player: player2,
-      orders: generateMaxOrders(1),
-    });
-    const midTurnRestoredGame = ConquestGame.deSerialize(
-      originalGame.serialize()
-    ) as ConquestGame;
-    expect(midTurnRestoredGame).toBeDefined();
-    midTurnRestoredGame.addPlayerTurnData({
-      player: player3,
-      orders: generateMaxOrders(2),
-    });
-    midTurnRestoredGame.addPlayerTurnData({
-      player: player4,
-      orders: generateMaxOrders(3),
-    });
-    // get data from original
-    const playersBefore = midTurnRestoredGame.getPlayers();
-    const planetsBefore = midTurnRestoredGame.getPlanets();
-    const fleetsBefore = midTurnRestoredGame.getFleets();
-    const serializedString = midTurnRestoredGame.serialize();
-    expect(serializedString).toBeDefined();
-    // restore game
-    const restoredGame = ConquestGame.deSerialize(
-      serializedString
-    ) as ConquestGame;
-    expect(restoredGame).toBeDefined();
-    // and compare restored data
-    const planetsAfter = restoredGame.getPlanets();
-    const fleetsAfter = restoredGame.getFleets();
-    const playersAfter = restoredGame.getPlayers();
-    expect(planetsBefore).toMatchObject(planetsAfter);
-    expect(playersBefore).toMatchObject(playersAfter);
-    expect(fleetsBefore).toMatchObject(fleetsAfter);
-  });
-
-  it("Trows error when passing invalid params", (): void => {
-    expect((): void => {
-      new ConquestGame({
-        fieldHeight: 10,
-        fieldWidth: 10,
-        neutralPlanetCount: 50,
-        players: [player1, player2],
-      });
-    }).toThrow();
-  });
-
   it("Able to mark player dead and ignore it for next one", (): void => {
-    const player3 = new Player("player3");
+    const player3 = new Player(undefined, "player3");
     const game = new ConquestGame({
       fieldHeight: 4,
       fieldWidth: 4,

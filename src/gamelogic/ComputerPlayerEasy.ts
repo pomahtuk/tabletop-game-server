@@ -1,11 +1,12 @@
 import ComputerPlayer, { ComputerPlayerType } from "./ComputerPlayer";
+import { v4 as uuid } from "uuid";
 
 class ComputerPlayerEasy extends ComputerPlayer {
   protected minimumShips = 20;
   protected shipCountFactor = 2;
 
-  constructor(name: string) {
-    super(name, ComputerPlayerType.EASY);
+  constructor(id: string = uuid(), name: string) {
+    super(id, name, ComputerPlayerType.EASY);
   }
 }
 

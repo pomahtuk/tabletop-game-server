@@ -1,7 +1,7 @@
 import Planet from "../Planet";
 import Player from "../Player";
 
-const testPlayer = new Player("tester");
+const testPlayer = new Player(undefined, "tester");
 
 const coordinates = {
   x: 1,

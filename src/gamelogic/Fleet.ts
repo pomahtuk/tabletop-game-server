@@ -25,10 +25,3 @@ export default class Fleet {
     this.destination = destination;
   }
 }
-
-export interface SerializedFleet {
-  amount: number;
-  killPercent: number;
-  destination: string;
-  ownerId: string;
-}
