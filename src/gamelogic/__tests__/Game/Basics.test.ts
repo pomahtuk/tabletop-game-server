@@ -1,6 +1,5 @@
-import ConquestGame from "../../Game";
-import Player, { PlayerTurnOrder } from "../../Player";
-import getPlanetName from "../../helpers/getPlanetName";
+import ConquestGame, { addPlayerTurnData } from "../../Game";
+import Player from "../../Player";
 
 const player1 = new Player(undefined, "player1");
 const player2 = new Player(undefined, "player2");
@@ -25,7 +24,7 @@ describe("Main game", (): void => {
     expect(game).toBeDefined();
 
     // get data
-    const players = game.getPlayers();
+    const players = game.players;
     const planets = game.planets;
 
     // check we have all players
@@ -63,7 +62,7 @@ describe("Main game", (): void => {
       players: [player1, player2, player3],
     });
     const assaultPlayer2 = (): void => {
-      game.addPlayerTurnData({
+      addPlayerTurnData(game, {
         player: player1,
         orders: [
           {
@@ -73,11 +72,11 @@ describe("Main game", (): void => {
           },
         ],
       });
-      game.addPlayerTurnData({
+      addPlayerTurnData(game, {
         player: player2,
         orders: [],
       });
-      game.addPlayerTurnData({
+      addPlayerTurnData(game, {
         player: player3,
         orders: [
           {
@@ -96,7 +95,7 @@ describe("Main game", (): void => {
       assaultPlayer2();
     }
     expect(player2.isDead).toBe(true);
-    game.addPlayerTurnData({
+    addPlayerTurnData(game, {
       player: player1,
       orders: [],
     });

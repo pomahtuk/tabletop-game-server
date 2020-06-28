@@ -8,6 +8,7 @@ import validateTurnData from "./helpers/validateTurnData";
 import placePlanets from "./helpers/placePlanets";
 import conductBattle from "./helpers/conductBattle";
 import markDeadPlayers from "./helpers/markDeadPlayers";
+import ComputerPlayer, { takeTurn } from "./ComputerPlayer";
 
 export interface GameOptions {
   fieldHeight: number;
@@ -36,13 +37,156 @@ export const findPlayerFleets = (fleets: Fleet[][], player: Player): Fleet[] =>
     return [...acc, ...playerFleets];
   }, []);
 
+const processTurn = (game: ConquestGame) => {
+  // send fleets
+  const currentTurns = game.turns;
+  for (const turn of currentTurns) {
+    for (const order of turn.orders) {
+      const originPlanet = game.planets[order.origin];
+      const destinationPlanet = game.planets[order.destination];
+      const fleetTimelineIndex = getDistanceBetweenPoints(
+        originPlanet.coordinates,
+        destinationPlanet.coordinates
+      );
+      const fleetTimelinePoint = game.fleetTimeline[fleetTimelineIndex] || [];
+      fleetTimelinePoint.push(
+        new Fleet({
+          owner: originPlanet.owner as Player,
+          amount: order.amount,
+          killPercent: originPlanet.killPercent,
+          destination: destinationPlanet.name,
+        })
+      );
+      game.fleetTimeline[fleetTimelineIndex] = fleetTimelinePoint;
+      originPlanet.ships -= order.amount;
+    }
+  }
+
+  // check arrival
+  const arrivingFleets = game.fleetTimeline.shift() || [];
+  for (const fleet of arrivingFleets) {
+    const destinationPlanet = game.planets[fleet.destination];
+    if (
+      destinationPlanet.owner &&
+      destinationPlanet.owner.id === fleet.owner.id
+    ) {
+      // arriving to own planet, grow fleet
+      destinationPlanet.ships += fleet.amount;
+    } else {
+      conductBattle({
+        attackerFleet: fleet,
+        defenderPlanet: destinationPlanet,
+      });
+    }
+  }
+
+  // do production only for captured planets
+  Object.keys(game.planets).forEach((planetName): void =>
+    game.planets[planetName].produce()
+  );
+
+  // mark dead players
+  markDeadPlayers({
+    players: game.players,
+    planets: game.planets,
+    remainingTimeline: game.fleetTimeline,
+  });
+
+  // clean turn data
+  game.turns = [];
+
+  // check if someone won
+  findWinner(game);
+};
+
+const findWinner = (game: ConquestGame): void => {
+  // may be check if all planets are captured?
+  const alivePlayers = game.players.filter((player): boolean => !player.isDead);
+  // if we have exactly 1 alive player
+  if (alivePlayers.length === 1) {
+    game.winner = alivePlayers[0];
+    game.status = GameStatus.COMPLETED;
+    return;
+  }
+  // if only computers left we don't really care about the winner
+  const humanPlayersLeft = alivePlayers.filter(
+    (player): boolean => !player.isComputer
+  );
+  if (humanPlayersLeft.length === 0) {
+    game.winner = null;
+    game.status = GameStatus.COMPLETED;
+  }
+};
+
+const findNextValidPlayer = (game: ConquestGame): void => {
+  game.waitingForPlayer += 1;
+  if (game.waitingForPlayer >= game.players.length) {
+    // if we made full circle - start anew
+    game.waitingForPlayer = 0;
+    // and process current turn
+    processTurn(game);
+  }
+  const nextPlayer = game.players[game.waitingForPlayer];
+  if (nextPlayer.isDead) {
+    findNextValidPlayer(game);
+  }
+  // moving computer turn processing here for now, but make sure not to make a turn once game completed
+  if (nextPlayer.isComputer && game.status !== GameStatus.COMPLETED) {
+    const orders = takeTurn(
+      nextPlayer as ComputerPlayer,
+      game.planets,
+      findPlayerFleets(game.fleetTimeline, nextPlayer)
+    );
+    addDataToTurn(game, {
+      player: nextPlayer,
+      orders,
+    });
+    findNextValidPlayer(game);
+  }
+};
+
+export const addPlayerTurnData = (
+  game: ConquestGame,
+  data: PlayerTurn
+): TurnStatus => {
+  // do not accept any turns for completed game
+  if (game.status === GameStatus.COMPLETED) {
+    return TurnStatus.IGNORED;
+  }
+  const { player } = data;
+  const playerWeAreWaitingFor = game.players[game.waitingForPlayer];
+  if (player.id !== playerWeAreWaitingFor.id) {
+    return TurnStatus.INVALID;
+  }
+  // this will throw if data is invalid
+  const result = validateTurnData(data, game.planets);
+  if (!result.valid) {
+    return TurnStatus.INVALID;
+  }
+  // mark game as in progress if it is not started yet
+  if (game.status === GameStatus.NOT_STARTED) {
+    game.status = GameStatus.IN_PROGRESS;
+  }
+  // check if we already have some data for this turn
+  addDataToTurn(game, data);
+  // update pointer to player we are waiting for
+  findNextValidPlayer(game);
+  return TurnStatus.VALID;
+};
+
+export const addDataToTurn = (game: ConquestGame, data: PlayerTurn): void => {
+  // check if we already have some data for this turn
+  const turn = game.turns;
+  turn.push(data);
+};
+
 class ConquestGame {
   public static maxSize = 20;
   public static minSize = 4;
   public static minPlayers = 2;
   public static maxPlayers = 4;
 
-  #players: Player[] = [];
+  public players: Player[] = [];
   readonly #fieldHeight: number;
   readonly #fieldWidth: number;
   public turns: PlayerTurn[] = [];
@@ -53,10 +197,6 @@ class ConquestGame {
   public status: GameStatus = GameStatus.NOT_STARTED;
   public winner: Player | null = null;
 
-  // testhelpers
-  public getPlayers() {
-    return this.#players;
-  }
   public get fieldSize(): [number, number] {
     return [this.#fieldHeight, this.#fieldWidth];
   }
@@ -82,151 +222,11 @@ class ConquestGame {
       planetCount: this.planetCount,
     });
     // we start from negative to make sure that when firs player is computer we are able to have a game
-    this.findNextValidPlayer();
-  }
-
-  public addPlayerTurnData(data: PlayerTurn): TurnStatus {
-    // do not accept any turns for completed game
-    if (this.status === GameStatus.COMPLETED) {
-      return TurnStatus.IGNORED;
-    }
-    const { player } = data;
-    const playerWeAreWaitingFor = this.#players[this.waitingForPlayer];
-    if (player.id !== playerWeAreWaitingFor.id) {
-      return TurnStatus.INVALID;
-    }
-    // this will throw if data is invalid
-    const result = validateTurnData(data, this.planets);
-    if (!result.valid) {
-      return TurnStatus.INVALID;
-    }
-    // mark game as in progress if it is not started yet
-    if (this.status === GameStatus.NOT_STARTED) {
-      this.status = GameStatus.IN_PROGRESS;
-    }
-    // check if we already have some data for this turn
-    this.addDataToTurn(data);
-    // update pointer to player we are waiting for
-    this.findNextValidPlayer();
-    return TurnStatus.VALID;
-  }
-
-  private addDataToTurn(data: PlayerTurn): void {
-    // check if we already have some data for this turn
-    const turn = this.turns;
-    turn.push(data);
-  }
-
-  private findNextValidPlayer(): void {
-    this.waitingForPlayer += 1;
-    if (this.waitingForPlayer >= this.#players.length) {
-      // if we made full circle - start anew
-      this.waitingForPlayer = 0;
-      // and process current turn
-      this.processTurn();
-    }
-    const nextPlayer = this.#players[this.waitingForPlayer];
-    if (nextPlayer.isDead) {
-      this.findNextValidPlayer();
-    }
-    // moving computer turn processing here for now, but make sure not to make a turn once game completed
-    if (nextPlayer.isComputer && this.status !== GameStatus.COMPLETED) {
-      const orders = nextPlayer.takeTurn(
-        this.planets,
-        findPlayerFleets(this.fleetTimeline, nextPlayer)
-      );
-      this.addDataToTurn({
-        player: nextPlayer,
-        orders,
-      });
-      this.findNextValidPlayer();
-    }
-  }
-
-  private processTurn(): void {
-    // send fleets
-    const currentTurns = this.turns;
-    for (const turn of currentTurns) {
-      for (const order of turn.orders) {
-        const originPlanet = this.planets[order.origin];
-        const destinationPlanet = this.planets[order.destination];
-        const fleetTimelineIndex = getDistanceBetweenPoints(
-          originPlanet.coordinates,
-          destinationPlanet.coordinates
-        );
-        const fleetTimelinePoint = this.fleetTimeline[fleetTimelineIndex] || [];
-        fleetTimelinePoint.push(
-          new Fleet({
-            owner: originPlanet.owner as Player,
-            amount: order.amount,
-            killPercent: originPlanet.killPercent,
-            destination: destinationPlanet.name,
-          })
-        );
-        this.fleetTimeline[fleetTimelineIndex] = fleetTimelinePoint;
-        originPlanet.ships -= order.amount;
-      }
-    }
-
-    // check arrival
-    const arrivingFleets = this.fleetTimeline.shift() || [];
-    for (const fleet of arrivingFleets) {
-      const destinationPlanet = this.planets[fleet.destination];
-      if (
-        destinationPlanet.owner &&
-        destinationPlanet.owner.id === fleet.owner.id
-      ) {
-        // arriving to own planet, grow fleet
-        destinationPlanet.ships += fleet.amount;
-      } else {
-        conductBattle({
-          attackerFleet: fleet,
-          defenderPlanet: destinationPlanet,
-        });
-      }
-    }
-
-    // do production only for captured planets
-    Object.keys(this.planets).forEach((planetName): void =>
-      this.planets[planetName].produce()
-    );
-    // mark dead players
-    markDeadPlayers({
-      players: this.#players,
-      planets: this.planets,
-      remainingTimeline: this.fleetTimeline,
-    });
-
-    // clean turn data
-    this.turns = [];
-
-    // check if someone won
-    this.findWinner();
-  }
-
-  private findWinner(): void {
-    // may be check if all planets are captured?
-    const alivePlayers = this.#players.filter(
-      (player): boolean => !player.isDead
-    );
-    // if we have exactly 1 alive player
-    if (alivePlayers.length === 1) {
-      this.winner = alivePlayers[0];
-      this.status = GameStatus.COMPLETED;
-      return;
-    }
-    // if only computers left we don't really care about the winner
-    const humanPlayersLeft = alivePlayers.filter(
-      (player): boolean => !player.isComputer
-    );
-    if (humanPlayersLeft.length === 0) {
-      this.winner = null;
-      this.status = GameStatus.COMPLETED;
-    }
+    findNextValidPlayer(this);
   }
 
   private addPlayers(newPlayers: Player[]): void {
-    this.#players = newPlayers;
+    this.players = newPlayers;
     // generate player planets
     newPlayers.forEach((player, index): void => {
       const playerPlanet = new Planet(getPlanetName(index), player);

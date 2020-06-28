@@ -1,8 +1,5 @@
 import { v4 as uuid } from "uuid";
 
-import Fleet from "./Fleet";
-import { PlanetMap } from "./Planet";
-
 export interface PlayerTurnOrder {
   origin: string;
   destination: string;
@@ -29,9 +26,5 @@ export default class Player {
     this.statEnemyShipsDestroyed = 0;
     this.statEnemyFleetsDestroyed = 0;
     this.statShipCount = 0;
-  }
-
-  public takeTurn(planets: PlanetMap, fleets: Fleet[]): PlayerTurnOrder[] {
-    return [];
   }
 }

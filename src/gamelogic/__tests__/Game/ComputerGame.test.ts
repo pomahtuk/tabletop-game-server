@@ -4,6 +4,7 @@ import ConquestGame, {
   TurnStatus,
   GameStatus,
   findPlayerFleets,
+  addPlayerTurnData,
 } from "../../Game";
 import { PlanetMap } from "../../Planet";
 import ComputerPlayerHard from "../../ComputerPlayerHard";
@@ -13,7 +14,7 @@ const computer = new ComputerPlayerEasy(undefined, "test");
 const player = new Player(undefined, "gamer");
 
 const makeEmptyPlayerTurn = (game: ConquestGame): TurnStatus => {
-  return game.addPlayerTurnData({
+  return addPlayerTurnData(game, {
     player: player,
     orders: [],
   });
@@ -99,7 +100,7 @@ describe("Could have a game with Computer player", (): void => {
     expect(player.isDead).toBe(false);
 
     // now let's send half of player planet fleet to computer planet, releasing deadlock
-    game.addPlayerTurnData({
+    addPlayerTurnData(game, {
       player: player,
       orders: [
         {
@@ -111,7 +112,7 @@ describe("Could have a game with Computer player", (): void => {
     });
 
     // at this point computer could make a move
-    game.addPlayerTurnData({
+    addPlayerTurnData(game, {
       player: player,
       orders: [
         {

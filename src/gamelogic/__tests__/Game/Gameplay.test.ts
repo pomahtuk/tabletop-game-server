@@ -1,18 +1,22 @@
-import ConquestGame, { GameStatus, TurnStatus } from "../../Game";
+import ConquestGame, {
+  addPlayerTurnData,
+  GameStatus,
+  TurnStatus,
+} from "../../Game";
 import Player from "../../Player";
 
 const player1 = new Player(undefined, "player1");
 const player2 = new Player(undefined, "player2");
 
 const makeIdlePlayer1Turn = (game: ConquestGame): void => {
-  game.addPlayerTurnData({
+  addPlayerTurnData(game, {
     player: player1,
     orders: [],
   });
 };
 
 const makeIdlePlayer2Turn = (game: ConquestGame): void => {
-  game.addPlayerTurnData({
+  addPlayerTurnData(game, {
     player: player2,
     orders: [],
   });
@@ -36,7 +40,7 @@ describe("Could have a game", (): void => {
   // and attacking player 2 capturing their planet
 
   it("Returns invalid status when passing invalid turn", (): void => {
-    const result = game.addPlayerTurnData({
+    const result = addPlayerTurnData(game, {
       player: player1,
       orders: [
         {
@@ -50,7 +54,7 @@ describe("Could have a game", (): void => {
   });
 
   it("Does not let player 2 take turn before player 1", (): void => {
-    const result = game.addPlayerTurnData({
+    const result = addPlayerTurnData(game, {
       player: player2,
       orders: [
         {
@@ -73,7 +77,7 @@ describe("Could have a game", (): void => {
 
   it("Does not accept player 1 turn for second time", (): void => {
     expect(game.waitingForPlayer).toBe(1);
-    const result = game.addPlayerTurnData({
+    const result = addPlayerTurnData(game, {
       player: player1,
       orders: [
         {
@@ -100,7 +104,7 @@ describe("Could have a game", (): void => {
     makeIdlePlayer2Turn(game);
     // let player 1 capture neutral planet
     const availableAttackFleet = game.planets["A"].ships;
-    game.addPlayerTurnData({
+    addPlayerTurnData(game, {
       player: player1,
       orders: [
         {
@@ -122,7 +126,7 @@ describe("Could have a game", (): void => {
       game.planets["A"].killPercent > game.planets["C"].killPercent ? "A" : "C";
     const sourcePlanet = combinePlanet === "A" ? "C" : "A";
     let availableFleetAtSource = game.planets[sourcePlanet].ships;
-    game.addPlayerTurnData({
+    addPlayerTurnData(game, {
       player: player1,
       orders: [
         {
@@ -136,7 +140,7 @@ describe("Could have a game", (): void => {
     // at this point turn processed and we have combined fleet at planet C
     const availableFleetAtDestination = game.planets[combinePlanet].ships;
     availableFleetAtSource = game.planets[sourcePlanet].ships;
-    game.addPlayerTurnData({
+    addPlayerTurnData(game, {
       player: player1,
       orders: [
         {
@@ -171,7 +175,7 @@ describe("Could have a game", (): void => {
 
   // now game should not accept new turns
   it("Does not accept any player turns after game completion", (): void => {
-    const result = game.addPlayerTurnData({
+    const result = addPlayerTurnData(game, {
       player: player1,
       orders: [],
     });
