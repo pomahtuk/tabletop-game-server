@@ -1,9 +1,10 @@
 import Player from "../Player";
 import Planet, { PlanetMap } from "../Planet";
 import Fleet from "../Fleet";
+import { User } from "../../dao/entities/user";
 
 export interface MarkDeadPlayersOptions {
-  players: Player[];
+  players: (Player | User)[];
   planets: PlanetMap;
   remainingTimeline: Fleet[][];
 }
@@ -29,7 +30,7 @@ const markDeadPlayers = ({
   });
   players.forEach((player): void => {
     if (!foundPlayerIds.has(player.id)) {
-      player.isDead = true;
+      player.stats!.isDead = true;
     }
   });
 };

@@ -1,5 +1,5 @@
 import ComputerPlayerHard from "../ComputerPlayerHard";
-import { ComputerPlayerType } from "../ComputerPlayer";
+import { ComputerPlayerType, takeTurn } from "../ComputerPlayer";
 import Planet from "../Planet";
 
 describe("ComputerPlayerHard", (): void => {
@@ -23,7 +23,7 @@ describe("ComputerPlayerHard", (): void => {
 
     planets.A.ships = 43;
 
-    expect(computer.takeTurn(planets, [])).toHaveLength(1);
+    expect(takeTurn(computer, planets, [])).toHaveLength(1);
   });
 
   it("Can prepare turn data for reinforcements", (): void => {
@@ -35,6 +35,6 @@ describe("ComputerPlayerHard", (): void => {
 
     planets.A.ships = 22;
 
-    expect(computer.takeTurn(planets, [])).toHaveLength(1);
+    expect(takeTurn(computer, planets, [])).toHaveLength(1);
   });
 });

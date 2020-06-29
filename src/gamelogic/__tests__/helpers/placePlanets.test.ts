@@ -3,10 +3,10 @@ import placePlanets, { Point } from "../../helpers/placePlanets";
 import Planet, { PlanetMap } from "../../Planet";
 import Player from "../../Player";
 
-const player1 = new Player(undefined, "player1");
-const player2 = new Player(undefined, "player2");
-const player3 = new Player(undefined, "player2");
-const player4 = new Player(undefined, "player2");
+const player1 = new Player();
+const player2 = new Player();
+const player3 = new Player();
+const player4 = new Player();
 
 const planets: PlanetMap = {
   A: new Planet("A", player1),

@@ -11,7 +11,7 @@ import ComputerPlayerHard from "../../ComputerPlayerHard";
 import Fleet from "../../Fleet";
 
 const computer = new ComputerPlayerEasy(undefined, "test");
-const player = new Player(undefined, "gamer");
+const player = new Player();
 
 const makeEmptyPlayerTurn = (game: ConquestGame): TurnStatus => {
   return addPlayerTurnData(game, {
@@ -97,7 +97,7 @@ describe("Could have a game with Computer player", (): void => {
       makeEmptyPlayerTurn(game);
     }
 
-    expect(player.isDead).toBe(false);
+    expect(player.stats!.isDead).toBe(false);
 
     // now let's send half of player planet fleet to computer planet, releasing deadlock
     addPlayerTurnData(game, {

@@ -2,6 +2,7 @@ import { UsersService } from "../users.service";
 import createTestConnection from "../../testhelpers/createTestConnection";
 import { BAD_REQUEST } from "http-status-codes";
 import { v4 } from "uuid";
+import { User } from "../../dao/entities/user";
 
 describe("UsersService", () => {
   let usersService: UsersService;
@@ -148,11 +149,12 @@ describe("UsersService", () => {
   it("Does not allow saving user with same email", async (): Promise<void> => {
     expect.assertions(3);
     try {
-      await usersService.saveUser({
+      const user = new User({
         username: "updated111111",
         email: TEST_USER_EMAIL,
         password: "1234567890",
       });
+      await usersService.saveUser(user);
     } catch (exception) {
       expect(exception).toBeDefined();
       expect(exception.status).toBe(BAD_REQUEST);

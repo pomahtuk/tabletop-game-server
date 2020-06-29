@@ -1,7 +1,7 @@
-import Planet from "../Planet";
+import Planet, { produceFleets } from "../Planet";
 import Player from "../Player";
 
-const testPlayer = new Player(undefined, "tester");
+const testPlayer = new Player();
 
 const coordinates = {
   x: 1,
@@ -56,15 +56,15 @@ describe("Planet", (): void => {
     expect(planet.production).toBe(10);
     expect(planet.ships).toBe(10);
 
-    planet.produce();
+    produceFleets(planet);
     expect(planet.ships).toBe(20);
-    expect(testPlayer.statShipCount).toBe(10);
+    expect(testPlayer.stats!.shipCount).toBe(10);
   });
 
   it("Planet could not produce ships without owner", (): void => {
     const planetName = "A";
     const planet = new Planet(planetName);
-    planet.produce();
+    produceFleets(planet);
     expect(planet.ships).toBe(planet.production);
   });
 });

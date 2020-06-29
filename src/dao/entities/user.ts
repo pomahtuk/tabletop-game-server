@@ -11,10 +11,25 @@ import {
 
 import { Game } from "./game";
 import { IsEmail, IsOptional, Length, Matches } from "class-validator";
+import { PlayerStats } from "../../gamelogic/Player";
+
+export interface UserData {
+  username: string;
+  password: string;
+  email: string;
+  games?: Game[];
+  activationCode?: string;
+}
 
 @Entity()
 export class User {
-  constructor(newUser?: User) {
+  // no need to store this in DB
+  public isComputer?: boolean = false;
+
+  public stats?: PlayerStats;
+
+  constructor(newUser?: UserData) {
+    this.isComputer = false;
     if (newUser) {
       this.username = newUser.username;
       this.password = newUser.password;
@@ -25,7 +40,7 @@ export class User {
   }
 
   @PrimaryGeneratedColumn("uuid")
-  public id?: string;
+  public id!: string;
 
   @Index("username", { unique: true })
   @Column({ type: "varchar", length: 255 })

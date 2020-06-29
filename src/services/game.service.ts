@@ -1,15 +1,9 @@
 import { DeleteResult, getRepository, Repository } from "typeorm";
 import { Game } from "../dao/entities/game";
 import { HttpException } from "../exceptions/httpException";
-import {
-  BAD_REQUEST,
-  FORBIDDEN,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-} from "http-status-codes";
+import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from "http-status-codes";
 import { validate } from "class-validator";
 import ValidationException from "../exceptions/validationException";
-import { User } from "../dao/entities/user";
 
 export interface GetGamesOptions {
   page?: number;
@@ -70,7 +64,7 @@ export class GameService {
     throw new HttpException("Game with this id does not exist", NOT_FOUND);
   }
 
-  public createGame(newGame: Game): Promise<Game> {
+  public createGame(newGame: Partial<Game>): Promise<Game> {
     // TODO: validate Game
     const game = this.repo.create(newGame);
     return this.repo.save(game);

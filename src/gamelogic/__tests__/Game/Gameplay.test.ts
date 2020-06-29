@@ -5,8 +5,8 @@ import ConquestGame, {
 } from "../../Game";
 import Player from "../../Player";
 
-const player1 = new Player(undefined, "player1");
-const player2 = new Player(undefined, "player2");
+const player1 = new Player();
+const player2 = new Player();
 
 const makeIdlePlayer1Turn = (game: ConquestGame): void => {
   addPlayerTurnData(game, {

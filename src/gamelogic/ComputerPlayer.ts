@@ -10,7 +10,7 @@ export enum ComputerPlayerType {
   HARD = "hard",
 }
 
-const shouldSkipPlanet = (
+export const shouldSkipPlanet = (
   planetName: string,
   orders: PlayerTurnOrder[],
   fleets: Fleet[]
@@ -127,9 +127,11 @@ class ComputerPlayer extends Player {
   public computerType: ComputerPlayerType;
   public minimumShips = 20;
   public shipCountFactor = 2;
+  public name: string;
 
   constructor(id: string = uuid(), name: string, type: ComputerPlayerType) {
-    super(id, name);
+    super(id);
+    this.name = name;
     this.isComputer = true;
     this.computerType = type;
   }

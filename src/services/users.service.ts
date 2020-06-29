@@ -6,7 +6,7 @@ import {
   NOT_FOUND,
 } from "http-status-codes";
 
-import { User } from "../dao/entities/user";
+import { User, UserData } from "../dao/entities/user";
 import { HttpException } from "../exceptions/httpException";
 import { validate } from "class-validator";
 import ValidationException from "../exceptions/validationException";
@@ -60,7 +60,7 @@ export class UsersService {
     return this.repo.delete(userId);
   }
 
-  public async createUser(newUser: User): Promise<User> {
+  public async createUser(newUser: UserData): Promise<User> {
     const userInstance = await UsersService.validateIncomingUser(newUser);
     try {
       const user = this.repo.create(userInstance);
@@ -136,7 +136,7 @@ export class UsersService {
     }
   }
 
-  private static async validateIncomingUser(newUser: User): Promise<User> {
+  private static async validateIncomingUser(newUser: UserData): Promise<User> {
     const userInstance = new User(newUser);
     return await UsersService.validateUserInstance(userInstance);
   }

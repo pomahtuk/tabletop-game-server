@@ -1,4 +1,8 @@
-import ComputerPlayer, { ComputerPlayerType } from "../ComputerPlayer";
+import ComputerPlayer, {
+  ComputerPlayerType,
+  shouldSkipPlanet,
+  takeTurn,
+} from "../ComputerPlayer";
 import Planet from "../Planet";
 
 describe("ComputerPlayer", (): void => {
@@ -23,9 +27,9 @@ describe("ComputerPlayer", (): void => {
       "test",
       ComputerPlayerType.EASY
     );
-    const shouldNot = computer.shouldSkipPlanet("A", [], []);
+    const shouldNot = shouldSkipPlanet("A", [], []);
     expect(shouldNot).toBe(false);
-    const shouldDueToOrders = computer.shouldSkipPlanet(
+    const shouldDueToOrders = shouldSkipPlanet(
       "A",
       [
         { origin: "B", destination: "A", amount: 10 },
@@ -34,7 +38,7 @@ describe("ComputerPlayer", (): void => {
       []
     );
     expect(shouldDueToOrders).toBe(true);
-    const shouldDueToFleets = computer.shouldSkipPlanet(
+    const shouldDueToFleets = shouldSkipPlanet(
       "A",
       [],
       [
@@ -51,7 +55,7 @@ describe("ComputerPlayer", (): void => {
       "test",
       ComputerPlayerType.EASY
     );
-    expect(computer.takeTurn({}, [])).toHaveLength(0);
+    expect(takeTurn(computer, {}, [])).toHaveLength(0);
   });
 
   it("Can prepare turn data when there is a planet to skip in data due to sent fleets", (): void => {
@@ -64,7 +68,8 @@ describe("ComputerPlayer", (): void => {
     planetC.ships = 100;
     const planetA = new Planet("A", null, { x: 0, y: 0 });
     const planetB = new Planet("B", null, { x: 0, y: 0 });
-    const turnData = computer.takeTurn(
+    const turnData = takeTurn(
+      computer,
       {
         A: planetA,
         B: planetB,
@@ -88,7 +93,8 @@ describe("ComputerPlayer", (): void => {
     planetD.ships = 100;
     const planetA = new Planet("A", computer, { x: 0, y: 0 });
     const planetB = new Planet("B", computer, { x: 0, y: 0 });
-    const turnData = computer.takeTurn(
+    const turnData = takeTurn(
+      computer,
       {
         A: planetA,
         B: planetB,

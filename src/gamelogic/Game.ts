@@ -1,4 +1,4 @@
-import Planet, { PlanetMap } from "./Planet";
+import Planet, { PlanetMap, produceFleets } from "./Planet";
 import Player, { PlayerTurn } from "./Player";
 import Fleet from "./Fleet";
 
@@ -9,6 +9,7 @@ import placePlanets from "./helpers/placePlanets";
 import conductBattle from "./helpers/conductBattle";
 import markDeadPlayers from "./helpers/markDeadPlayers";
 import ComputerPlayer, { takeTurn } from "./ComputerPlayer";
+import { User } from "../dao/entities/user";
 
 export interface GameOptions {
   fieldHeight: number;
@@ -29,7 +30,10 @@ export enum TurnStatus {
   "INVALID" = "invalid",
 }
 
-export const findPlayerFleets = (fleets: Fleet[][], player: Player): Fleet[] =>
+export const findPlayerFleets = (
+  fleets: Fleet[][],
+  player: Player | User
+): Fleet[] =>
   fleets.reduce((acc, fleetList) => {
     const playerFleets = fleetList.filter(
       (fleet) => fleet.owner.id === player.id
@@ -82,12 +86,12 @@ const processTurn = (game: ConquestGame) => {
 
   // do production only for captured planets
   Object.keys(game.planets).forEach((planetName): void =>
-    game.planets[planetName].produce()
+    produceFleets(game.planets[planetName])
   );
 
   // mark dead players
   markDeadPlayers({
-    players: game.players,
+    players: game.players!,
     planets: game.planets,
     remainingTimeline: game.fleetTimeline,
   });
@@ -101,7 +105,9 @@ const processTurn = (game: ConquestGame) => {
 
 const findWinner = (game: ConquestGame): void => {
   // may be check if all planets are captured?
-  const alivePlayers = game.players.filter((player): boolean => !player.isDead);
+  const alivePlayers = game.players!.filter(
+    (player): boolean => !player.stats!.isDead
+  );
   // if we have exactly 1 alive player
   if (alivePlayers.length === 1) {
     game.winner = alivePlayers[0];
@@ -118,16 +124,16 @@ const findWinner = (game: ConquestGame): void => {
   }
 };
 
-const findNextValidPlayer = (game: ConquestGame): void => {
+export const findNextValidPlayer = (game: ConquestGame): void => {
   game.waitingForPlayer += 1;
-  if (game.waitingForPlayer >= game.players.length) {
+  if (game.waitingForPlayer >= game.players!.length) {
     // if we made full circle - start anew
     game.waitingForPlayer = 0;
     // and process current turn
     processTurn(game);
   }
-  const nextPlayer = game.players[game.waitingForPlayer];
-  if (nextPlayer.isDead) {
+  const nextPlayer = game.players![game.waitingForPlayer];
+  if (nextPlayer.stats!.isDead) {
     findNextValidPlayer(game);
   }
   // moving computer turn processing here for now, but make sure not to make a turn once game completed
@@ -145,6 +151,12 @@ const findNextValidPlayer = (game: ConquestGame): void => {
   }
 };
 
+const addDataToTurn = (game: ConquestGame, data: PlayerTurn): void => {
+  // check if we already have some data for this turn
+  const turn = game.turns;
+  turn.push(data);
+};
+
 export const addPlayerTurnData = (
   game: ConquestGame,
   data: PlayerTurn
@@ -154,7 +166,7 @@ export const addPlayerTurnData = (
     return TurnStatus.IGNORED;
   }
   const { player } = data;
-  const playerWeAreWaitingFor = game.players[game.waitingForPlayer];
+  const playerWeAreWaitingFor = game.players![game.waitingForPlayer!];
   if (player.id !== playerWeAreWaitingFor.id) {
     return TurnStatus.INVALID;
   }
@@ -174,31 +186,24 @@ export const addPlayerTurnData = (
   return TurnStatus.VALID;
 };
 
-export const addDataToTurn = (game: ConquestGame, data: PlayerTurn): void => {
-  // check if we already have some data for this turn
-  const turn = game.turns;
-  turn.push(data);
-};
-
 class ConquestGame {
   public static maxSize = 20;
   public static minSize = 4;
   public static minPlayers = 2;
   public static maxPlayers = 4;
 
-  public players: Player[] = [];
-  readonly #fieldHeight: number;
-  readonly #fieldWidth: number;
+  public players?: (User | Player)[] = [];
+  readonly fieldHeight: number;
+  readonly fieldWidth: number;
   public turns: PlayerTurn[] = [];
   public planets: PlanetMap = {};
-  private planetCount = 0;
   public waitingForPlayer = -1;
   public fleetTimeline: Fleet[][] = [];
   public status: GameStatus = GameStatus.NOT_STARTED;
-  public winner: Player | null = null;
+  public winner: Player | User | null = null;
 
   public get fieldSize(): [number, number] {
-    return [this.#fieldHeight, this.#fieldWidth];
+    return [this.fieldHeight, this.fieldWidth];
   }
 
   public constructor({
@@ -207,25 +212,25 @@ class ConquestGame {
     neutralPlanetCount,
     players: newPlayers,
   }: GameOptions) {
-    this.#fieldHeight = height;
-    this.#fieldWidth = width;
+    this.fieldHeight = height;
+    this.fieldWidth = width;
     // create game field
     // get players in easy way
-    this.addPlayers(newPlayers);
+    this.addPlayers!(newPlayers);
     // add neutral planets
-    this.addNeutralPlanets(neutralPlanetCount, newPlayers.length);
+    this.addNeutralPlanets!(neutralPlanetCount, newPlayers.length);
     // place planets
     placePlanets({
       planets: this.planets,
-      fieldHeight: this.#fieldHeight,
-      fieldWidth: this.#fieldWidth,
-      planetCount: this.planetCount,
+      fieldHeight: this.fieldHeight,
+      fieldWidth: this.fieldWidth,
+      planetCount: neutralPlanetCount + newPlayers.length,
     });
     // we start from negative to make sure that when firs player is computer we are able to have a game
     findNextValidPlayer(this);
   }
 
-  private addPlayers(newPlayers: Player[]): void {
+  private addPlayers?(newPlayers: Player[]): void {
     this.players = newPlayers;
     // generate player planets
     newPlayers.forEach((player, index): void => {
@@ -234,7 +239,7 @@ class ConquestGame {
     });
   }
 
-  private addNeutralPlanets(
+  private addNeutralPlanets?(
     neutralPlanetCount: number,
     playersCount: number
   ): void {
@@ -242,7 +247,6 @@ class ConquestGame {
       const planet = new Planet(getPlanetName(playersCount + i));
       this.planets[planet.name] = planet;
     }
-    this.planetCount = neutralPlanetCount + playersCount;
   }
 }
 

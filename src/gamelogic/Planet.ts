@@ -1,15 +1,24 @@
 import randomColor from "randomcolor";
 
 import Player from "./Player";
+import { User } from "../dao/entities/user";
 
 export interface PlanetCoordinates {
   x: number;
   y: number;
 }
 
+export const produceFleets = (planet: Planet) => {
+  if (planet.owner) {
+    planet.ships += planet.production;
+    // increase produced ship count
+    planet.owner.stats!.shipCount += planet.production;
+  }
+};
+
 export default class Planet {
   public name: string;
-  public owner: Player | null = null; // reference co playerId
+  public owner: Player | User | null = null; // reference co playerId
   public ships: number;
   public shipsDue: number = 0; // only if there are ships en route
   public production: number; // only happens when planet is taken, next turn
@@ -22,7 +31,7 @@ export default class Planet {
 
   public constructor(
     name: string,
-    player?: Player | null,
+    player?: Player | User | null,
     coordinates: PlanetCoordinates = { x: 0, y: 0 }
   ) {
     // initialize
@@ -43,14 +52,6 @@ export default class Planet {
     this.production = production;
     this.killPercent = killPercent;
     this.mainColor = randomColor({ luminosity: "dark" });
-  }
-
-  public produce(): void {
-    if (this.owner) {
-      this.ships += this.production;
-      // increase produced ship count
-      this.owner.statShipCount += this.production;
-    }
   }
 }
 

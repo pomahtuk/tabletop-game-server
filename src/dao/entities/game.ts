@@ -1,20 +1,22 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  OneToOne,
+  Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 
 import { User } from "./user";
-import { IsBoolean, Min, Max, IsOptional, Length } from "class-validator";
-import Planet, { PlanetMap } from "../../gamelogic/Planet";
+import { IsBoolean, IsOptional, Length, Max, Min } from "class-validator";
+import { PlanetMap } from "../../gamelogic/Planet";
 import Fleet from "../../gamelogic/Fleet";
-import Player, { PlayerTurn } from "../../gamelogic/Player";
+import { PlayerTurn } from "../../gamelogic/Player";
+import ComputerPlayer from "../../gamelogic/ComputerPlayer";
+import { GameStatus } from "../../gamelogic/Game";
 
 // Game with bots should be possible
 
@@ -129,16 +131,16 @@ export class Game {
   public winner?: User;
 
   // TODO: may be switch to proper JSON?
-  @Column("simple-json")
-  public players?: Player[];
+  @Column({ type: "simple-json", default: [] })
+  public players?: (User | ComputerPlayer)[];
 
-  @Column("simple-json")
+  @Column({ type: "simple-json", default: {} })
   public planets?: PlanetMap;
 
-  @Column("simple-json")
+  @Column({ type: "simple-json", default: [] })
   public fleetTimeline?: Fleet[][];
 
-  @Column("simple-json")
+  @Column({ type: "simple-json", default: [] })
   public turns?: PlayerTurn[];
 
   // Technical info
@@ -147,4 +149,37 @@ export class Game {
 
   @UpdateDateColumn()
   public updatedAt?: Date;
+
+  // helpers
+  public get fieldSize(): [number, number] {
+    return [this.fieldHeight ?? 0, this.fieldWidth ?? 0];
+  }
+
+  public get status(): GameStatus {
+    if (!this.gameStarted) {
+      return GameStatus.NOT_STARTED;
+    }
+
+    if (this.gameCompleted) {
+      return GameStatus.COMPLETED;
+    }
+
+    return GameStatus.IN_PROGRESS;
+  }
+
+  public set status(status: GameStatus) {
+    switch (status) {
+      case GameStatus.COMPLETED:
+        this.gameCompleted = true;
+        this.gameStarted = true;
+        break;
+      case GameStatus.IN_PROGRESS:
+        this.gameStarted = true;
+        this.gameCompleted = false;
+        break;
+      case GameStatus.NOT_STARTED:
+        this.gameStarted = false;
+        this.gameCompleted = false;
+    }
+  }
 }

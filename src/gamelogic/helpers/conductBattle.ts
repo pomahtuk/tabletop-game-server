@@ -1,6 +1,7 @@
 import Planet from "../Planet";
 import Player from "../Player";
 import Fleet from "../Fleet";
+import { User } from "../../dao/entities/user";
 
 export interface ConductBattleParams {
   attackerFleet: Fleet;
@@ -14,16 +15,16 @@ const conductBattle = ({
   let haveVictor = false;
   let planetHolds = true;
 
-  const makePlanetKill = (fleet: Fleet, player: Player | null): void => {
+  const makePlanetKill = (fleet: Fleet, player: Player | User | null): void => {
     fleet.amount -= 1;
     if (player) {
-      player.statEnemyShipsDestroyed += 1;
+      player.stats!.enemyShipsDestroyed += 1;
     }
   };
 
   const makeFleetKill = (planet: Planet, player: Player): void => {
     planet.ships -= 1;
-    player.statEnemyShipsDestroyed += 1;
+    player.stats!.enemyShipsDestroyed += 1;
   };
 
   while (!haveVictor) {
@@ -56,11 +57,11 @@ const conductBattle = ({
   }
 
   if (planetHolds && defenderPlanet.owner) {
-    defenderPlanet.owner.statEnemyFleetsDestroyed += 1;
+    defenderPlanet.owner.stats!.enemyFleetsDestroyed += 1;
   }
 
   if (!planetHolds) {
-    attackerFleet.owner.statEnemyFleetsDestroyed += 1;
+    attackerFleet.owner.stats!.enemyFleetsDestroyed += 1;
     defenderPlanet.owner = attackerFleet.owner;
   }
 };

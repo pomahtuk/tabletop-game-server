@@ -7,7 +7,7 @@ import conductBattle from "../../helpers/conductBattle";
 
 describe("conductBattle", (): void => {
   it("Able to conduct simple battle with attacker as a clear winner", (): void => {
-    const player1 = new Player(undefined, "One");
+    const player1 = new Player();
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 100,
@@ -22,13 +22,13 @@ describe("conductBattle", (): void => {
       attackerFleet,
       defenderPlanet,
     });
-    expect(player1.statEnemyFleetsDestroyed).toBe(1);
-    expect(player1.statEnemyShipsDestroyed).toBe(shipsToDestroy);
+    expect(player1.stats!.enemyFleetsDestroyed).toBe(1);
+    expect(player1.stats!.enemyShipsDestroyed).toBe(shipsToDestroy);
     expect(defenderPlanet.owner).toMatchObject(player1);
   });
 
   it("Able to conduct simple battle with defender as a clear winner", (): void => {
-    const player1 = new Player(undefined, "One");
+    const player1 = new Player();
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 1,
@@ -42,13 +42,13 @@ describe("conductBattle", (): void => {
       attackerFleet,
       defenderPlanet,
     });
-    expect(player1.statEnemyFleetsDestroyed).toBe(0);
+    expect(player1.stats!.enemyFleetsDestroyed).toBe(0);
     expect(defenderPlanet.owner).toBeNull();
   });
 
   it("Able to conquer planet from other player", (): void => {
-    const player1 = new Player(undefined, "One");
-    const player2 = new Player(undefined, "Two");
+    const player1 = new Player();
+    const player2 = new Player();
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 30,
@@ -62,13 +62,13 @@ describe("conductBattle", (): void => {
       attackerFleet,
       defenderPlanet,
     });
-    expect(player1.statEnemyFleetsDestroyed).toBe(1);
+    expect(player1.stats!.enemyFleetsDestroyed).toBe(1);
     expect(defenderPlanet.owner).toMatchObject(player1);
   });
 
   it("Able to hold player planet against attack", (): void => {
-    const player1 = new Player(undefined, "One");
-    const player2 = new Player(undefined, "Two");
+    const player1 = new Player();
+    const player2 = new Player();
     const attackerFleet = new Fleet({
       owner: player1,
       amount: 3,
@@ -82,8 +82,8 @@ describe("conductBattle", (): void => {
       attackerFleet,
       defenderPlanet,
     });
-    expect(player2.statEnemyFleetsDestroyed).toBe(1);
-    expect(player2.statEnemyShipsDestroyed).toBe(3);
+    expect(player2.stats!.enemyFleetsDestroyed).toBe(1);
+    expect(player2.stats!.enemyShipsDestroyed).toBe(3);
     expect(defenderPlanet.owner).toMatchObject(player2);
   });
 });

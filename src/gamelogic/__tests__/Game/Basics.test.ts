@@ -1,8 +1,8 @@
 import ConquestGame, { addPlayerTurnData } from "../../Game";
 import Player from "../../Player";
 
-const player1 = new Player(undefined, "player1");
-const player2 = new Player(undefined, "player2");
+const player1 = new Player();
+const player2 = new Player();
 
 describe("Main game", (): void => {
   it("Exposing maximum and minimum parameters", (): void => {
@@ -29,7 +29,7 @@ describe("Main game", (): void => {
 
     // check we have all players
     expect(players).toBeDefined();
-    expect(players.length).toBe(2);
+    expect(players!.length).toBe(2);
 
     // check we have planets generated
     expect(planets).toBeDefined();
@@ -54,7 +54,7 @@ describe("Main game", (): void => {
   });
 
   it("Able to mark player dead and ignore it for next one", (): void => {
-    const player3 = new Player(undefined, "player3");
+    const player3 = new Player(undefined);
     const game = new ConquestGame({
       fieldHeight: 4,
       fieldWidth: 4,
@@ -91,10 +91,10 @@ describe("Main game", (): void => {
     // at this point turn should be complete
     // player2 dead and we are waiting for player1
     expect(game.waitingForPlayer).toBe(0);
-    if (!player2.isDead) {
+    if (!player2.stats!.isDead) {
       assaultPlayer2();
     }
-    expect(player2.isDead).toBe(true);
+    expect(player2.stats!.isDead).toBe(true);
     addPlayerTurnData(game, {
       player: player1,
       orders: [],

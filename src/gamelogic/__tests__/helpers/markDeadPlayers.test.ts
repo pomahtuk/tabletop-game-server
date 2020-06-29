@@ -6,8 +6,8 @@ import markDeadPlayers from "../../helpers/markDeadPlayers";
 
 describe("markDeadPlayers", (): void => {
   it("Do nothing if all players are alive", (): void => {
-    const player1 = new Player(undefined, "One");
-    const player2 = new Player(undefined, "Two");
+    const player1 = new Player();
+    const player2 = new Player();
     const players = [player1, player2];
     const planets = {
       A: new Planet("A", player1),
@@ -20,12 +20,12 @@ describe("markDeadPlayers", (): void => {
       remainingTimeline: [[]],
     });
 
-    expect(player1.isDead).toBe(false);
-    expect(player2.isDead).toBe(false);
+    expect(player1.stats!.isDead).toBe(false);
+    expect(player2.stats!.isDead).toBe(false);
   });
 
   it("Do nothing if player have one fleet flying", (): void => {
-    const player1 = new Player(undefined, "One");
+    const player1 = new Player();
     const players = [player1];
     const planets = {};
 
@@ -43,11 +43,11 @@ describe("markDeadPlayers", (): void => {
       ],
     });
 
-    expect(player1.isDead).toBe(false);
+    expect(player1.stats!.isDead).toBe(false);
   });
 
   it("Mark player dead if it has no planets and no fleets standing", (): void => {
-    const player1 = new Player(undefined, "One");
+    const player1 = new Player();
     const players = [player1];
     const planets = {};
 
@@ -57,6 +57,6 @@ describe("markDeadPlayers", (): void => {
       remainingTimeline: [[]],
     });
 
-    expect(player1.isDead).toBe(true);
+    expect(player1.stats!.isDead).toBe(true);
   });
 });
