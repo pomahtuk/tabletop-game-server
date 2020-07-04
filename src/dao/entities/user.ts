@@ -11,7 +11,7 @@ import {
 
 import { Game } from "./game";
 import { IsEmail, IsOptional, Length, Matches } from "class-validator";
-import { PlayerStats } from "../../gamelogic/Player";
+import { Player, PlayerStats } from "../../gamelogic/Player";
 
 export interface UserData {
   username: string;
@@ -22,9 +22,9 @@ export interface UserData {
 }
 
 @Entity()
-export class User {
+export class User implements Player {
   // no need to store this in DB
-  public isComputer?: boolean = false;
+  public isComputer: boolean = false;
 
   public stats?: PlayerStats;
 

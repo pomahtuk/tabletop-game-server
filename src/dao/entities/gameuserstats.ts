@@ -8,16 +8,25 @@ import {
 } from "typeorm";
 import { PlayerStats } from "../../gamelogic/Player";
 
+export interface GameUserStatsParams {
+  gameId: string;
+  userId: string;
+  stats: PlayerStats;
+}
+
 @Entity()
 @Index(["gameId", "userId"])
 export class GameUserStats {
-  constructor(gameId: string, userId: string, stats: PlayerStats) {
-    this.gameId = gameId;
-    this.userId = userId;
-    this.enemyFleetsDestroyed = stats.enemyFleetsDestroyed;
-    this.enemyShipsDestroyed = stats.enemyShipsDestroyed;
-    this.shipCount = stats.shipCount;
-    this.isDead = stats.isDead;
+  constructor(params?: GameUserStatsParams) {
+    if (params) {
+      const { gameId, userId, stats } = params;
+      this.gameId = gameId;
+      this.userId = userId;
+      this.enemyFleetsDestroyed = stats.enemyFleetsDestroyed;
+      this.enemyShipsDestroyed = stats.enemyShipsDestroyed;
+      this.shipCount = stats.shipCount;
+      this.isDead = stats.isDead;
+    }
   }
 
   @PrimaryGeneratedColumn()

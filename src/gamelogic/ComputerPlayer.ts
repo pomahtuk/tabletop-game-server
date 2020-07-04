@@ -1,4 +1,4 @@
-import Player, { PlayerTurnOrder } from "./Player";
+import { Player, PlayerTurnOrder } from "./Player";
 import Fleet from "./Fleet";
 import Planet, { PlanetMap } from "./Planet";
 import getDistanceBetweenPoints from "./helpers/getDistanceBetweenPoints";
@@ -42,7 +42,7 @@ export const takeTurn = (
   );
 
   for (const origin of planetList) {
-    if (origin.owner && origin.owner.id === player.id) {
+    if (origin.owner && origin.owner === player.id) {
       let shouldAttack = false;
       let shipsToSend = Math.floor(origin.ships * 0.7);
       let destinationName = "";
@@ -50,7 +50,7 @@ export const takeTurn = (
 
       if (shipsToSend >= player.minimumShips) {
         for (const destination of planetList) {
-          if (destination.owner && destination.owner.id === player.id) {
+          if (destination.owner && destination.owner === player.id) {
             continue;
           }
 
@@ -92,7 +92,7 @@ export const takeTurn = (
           if (
             distance < minDistance &&
             destination.owner &&
-            destination.owner.id === player.id &&
+            destination.owner === player.id &&
             destination.ships < homeShips
           ) {
             if (shouldSkipPlanet(destination.name, orders, fleets)) {
@@ -123,16 +123,21 @@ export const takeTurn = (
   return orders;
 };
 
-class ComputerPlayer extends Player {
+class ComputerPlayer implements Player {
   public computerType: ComputerPlayerType;
   public minimumShips = 20;
   public shipCountFactor = 2;
   public name: string;
+  public isComputer = true;
+  public id: string;
 
-  constructor(id: string = uuid(), name: string, type: ComputerPlayerType) {
-    super(id);
+  constructor(
+    id: string = `computer_${uuid()}`,
+    name: string,
+    type: ComputerPlayerType
+  ) {
+    this.id = id;
     this.name = name;
-    this.isComputer = true;
     this.computerType = type;
   }
 }

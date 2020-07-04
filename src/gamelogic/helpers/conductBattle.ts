@@ -1,30 +1,31 @@
 import Planet from "../Planet";
-import Player from "../Player";
+import { PlayerStatsMap } from "../Player";
 import Fleet from "../Fleet";
-import { User } from "../../dao/entities/user";
 
 export interface ConductBattleParams {
   attackerFleet: Fleet;
   defenderPlanet: Planet;
+  statsMap: PlayerStatsMap;
 }
 
 const conductBattle = ({
   defenderPlanet,
   attackerFleet,
+  statsMap,
 }: ConductBattleParams): void => {
   let haveVictor = false;
   let planetHolds = true;
 
-  const makePlanetKill = (fleet: Fleet, player: Player | User | null): void => {
+  const makePlanetKill = (fleet: Fleet, playerId?: string): void => {
     fleet.amount -= 1;
-    if (player) {
-      player.stats!.enemyShipsDestroyed += 1;
+    if (playerId && statsMap[playerId]) {
+      statsMap[playerId].enemyShipsDestroyed += 1;
     }
   };
 
-  const makeFleetKill = (planet: Planet, player: Player): void => {
+  const makeFleetKill = (planet: Planet, playerId: string): void => {
     planet.ships -= 1;
-    player.stats!.enemyShipsDestroyed += 1;
+    statsMap[playerId]!.enemyShipsDestroyed += 1;
   };
 
   while (!haveVictor) {
@@ -56,12 +57,12 @@ const conductBattle = ({
     }
   }
 
-  if (planetHolds && defenderPlanet.owner) {
-    defenderPlanet.owner.stats!.enemyFleetsDestroyed += 1;
+  if (planetHolds && defenderPlanet.owner && statsMap[defenderPlanet.owner]) {
+    statsMap[defenderPlanet.owner].enemyFleetsDestroyed += 1;
   }
 
   if (!planetHolds) {
-    attackerFleet.owner.stats!.enemyFleetsDestroyed += 1;
+    statsMap[attackerFleet.owner].enemyFleetsDestroyed += 1;
     defenderPlanet.owner = attackerFleet.owner;
   }
 };

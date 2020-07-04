@@ -1,4 +1,3 @@
-import Player from "../../Player";
 import Planet from "../../Planet";
 import Fleet from "../../Fleet";
 
@@ -6,28 +5,54 @@ import markDeadPlayers from "../../helpers/markDeadPlayers";
 
 describe("markDeadPlayers", (): void => {
   it("Do nothing if all players are alive", (): void => {
-    const player1 = new Player();
-    const player2 = new Player();
-    const players = [player1, player2];
+    const player1Id = "1";
+    const player2Id = "2";
+    const players = [player1Id, player2Id];
+
+    const statsMap = {
+      [player1Id]: {
+        enemyShipsDestroyed: 0,
+        enemyFleetsDestroyed: 0,
+        shipCount: 0,
+        isDead: false,
+      },
+      [player2Id]: {
+        enemyShipsDestroyed: 0,
+        enemyFleetsDestroyed: 0,
+        shipCount: 0,
+        isDead: false,
+      },
+    };
+
     const planets = {
-      A: new Planet("A", player1),
-      B: new Planet("B", player2),
+      A: new Planet("A", player1Id),
+      B: new Planet("B", player2Id),
     };
 
     markDeadPlayers({
       players,
       planets,
       remainingTimeline: [[]],
+      statsMap,
     });
 
-    expect(player1.stats!.isDead).toBe(false);
-    expect(player2.stats!.isDead).toBe(false);
+    expect(statsMap[player1Id].isDead).toBe(false);
+    expect(statsMap[player1Id].isDead).toBe(false);
   });
 
   it("Do nothing if player have one fleet flying", (): void => {
-    const player1 = new Player();
-    const players = [player1];
+    const playerId = "1";
+    const players = [playerId];
     const planets = {};
+
+    const statsMap = {
+      [playerId]: {
+        enemyShipsDestroyed: 0,
+        enemyFleetsDestroyed: 0,
+        shipCount: 0,
+        isDead: false,
+      },
+    };
 
     markDeadPlayers({
       players,
@@ -35,28 +60,39 @@ describe("markDeadPlayers", (): void => {
       remainingTimeline: [
         [
           new Fleet({
-            owner: player1,
+            owner: playerId,
             amount: 10,
             destination: "A",
           }),
         ],
       ],
+      statsMap,
     });
 
-    expect(player1.stats!.isDead).toBe(false);
+    expect(statsMap[playerId].isDead).toBe(false);
   });
 
   it("Mark player dead if it has no planets and no fleets standing", (): void => {
-    const player1 = new Player();
-    const players = [player1];
+    const playerId = "1";
+    const players = [playerId];
     const planets = {};
+
+    const statsMap = {
+      [playerId]: {
+        enemyShipsDestroyed: 0,
+        enemyFleetsDestroyed: 0,
+        shipCount: 0,
+        isDead: false,
+      },
+    };
 
     markDeadPlayers({
       players,
       planets,
       remainingTimeline: [[]],
+      statsMap,
     });
 
-    expect(player1.stats!.isDead).toBe(true);
+    expect(statsMap[playerId].isDead).toBe(true);
   });
 });

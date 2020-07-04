@@ -1,18 +1,12 @@
 import placePlanets, { Point } from "../../helpers/placePlanets";
 
 import Planet, { PlanetMap } from "../../Planet";
-import Player from "../../Player";
-
-const player1 = new Player();
-const player2 = new Player();
-const player3 = new Player();
-const player4 = new Player();
 
 const planets: PlanetMap = {
-  A: new Planet("A", player1),
-  B: new Planet("B", player2),
-  C: new Planet("C", player3),
-  D: new Planet("D", player4),
+  A: new Planet("A", "1"),
+  B: new Planet("B", "2"),
+  C: new Planet("C", "3"),
+  D: new Planet("D", "4"),
 };
 
 describe("placePlanets", (): void => {

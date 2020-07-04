@@ -1,12 +1,11 @@
 import validateTurnData from "../../helpers/validateTurnData";
 
 import Planet, { PlanetMap } from "../../Planet";
-import Player from "../../Player";
 
-const player1 = new Player();
+const playerId = "1";
 
 const planets: PlanetMap = {
-  A: new Planet("A", player1),
+  A: new Planet("A", playerId),
   B: new Planet("B"),
 };
 
@@ -14,7 +13,7 @@ describe("Can validate player turn", (): void => {
   it("Validates correct turn", (): void => {
     const validationResult = validateTurnData(
       {
-        player: player1,
+        playerId,
         orders: [
           {
             origin: "A",
@@ -31,7 +30,7 @@ describe("Can validate player turn", (): void => {
 
     const emptyTurnValidationResult = validateTurnData(
       {
-        player: player1,
+        playerId,
         orders: [],
       },
       planets
@@ -55,9 +54,8 @@ describe("Can validate player turn", (): void => {
 
   it("Return error for incomplete turn without origin in order", (): void => {
     const validationResult = validateTurnData(
-      // @ts-ignore
       {
-        player: player1,
+        playerId,
         orders: [
           {
             // @ts-ignore
@@ -76,7 +74,7 @@ describe("Can validate player turn", (): void => {
 
     const missingValidationResult = validateTurnData(
       {
-        player: player1,
+        playerId,
         orders: [
           {
             origin: "Z",
@@ -95,11 +93,9 @@ describe("Can validate player turn", (): void => {
 
   it("Return error for incomplete turn without destination in order", (): void => {
     const validationResult = validateTurnData(
-      // @ts-ignore
       {
-        player: player1,
+        playerId,
         orders: [
-          // @ts-ignore
           {
             origin: "A",
             // @ts-ignore
@@ -117,7 +113,7 @@ describe("Can validate player turn", (): void => {
 
     const missingValidationResult = validateTurnData(
       {
-        player: player1,
+        playerId,
         orders: [
           {
             origin: "A",
@@ -137,7 +133,7 @@ describe("Can validate player turn", (): void => {
   it("Return error when trying to send ships from planet which does not belong to player", (): void => {
     const validationResult = validateTurnData(
       {
-        player: player1,
+        playerId,
         orders: [
           {
             origin: "B",
@@ -157,7 +153,7 @@ describe("Can validate player turn", (): void => {
   it("Throws error when trying to send more ships that are available at origin", (): void => {
     const validationResult = validateTurnData(
       {
-        player: player1,
+        playerId,
         orders: [
           {
             origin: "A",
@@ -177,7 +173,7 @@ describe("Can validate player turn", (): void => {
   it("Throws error when trying to send more ships that are available at origin in few orders", (): void => {
     const validationResult = validateTurnData(
       {
-        player: player1,
+        playerId,
         orders: [
           {
             origin: "A",

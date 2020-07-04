@@ -5,7 +5,7 @@ class ComputerPlayerHard extends ComputerPlayer {
   public minimumShips = 30;
   public shipCountFactor = 3;
 
-  constructor(id: string = uuid(), name: string) {
+  constructor(id: string = `computer_${uuid()}`, name: string) {
     super(id, name, ComputerPlayerType.HARD);
   }
 }

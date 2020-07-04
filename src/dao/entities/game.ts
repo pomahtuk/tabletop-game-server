@@ -2,10 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -14,8 +12,7 @@ import { User } from "./user";
 import { IsBoolean, IsOptional, Length, Max, Min } from "class-validator";
 import { PlanetMap } from "../../gamelogic/Planet";
 import Fleet from "../../gamelogic/Fleet";
-import { PlayerTurn } from "../../gamelogic/Player";
-import ComputerPlayer from "../../gamelogic/ComputerPlayer";
+import { Player, PlayerTurn } from "../../gamelogic/Player";
 import { GameStatus } from "../../gamelogic/Game";
 
 // Game with bots should be possible
@@ -29,14 +26,16 @@ export class Game {
       this.gameCode = gameData.gameCode;
       this.users = gameData.users;
       this.gameStarted = gameData.gameStarted;
+      this.gameCompleted = gameData.gameCompleted;
       this.fieldWidth = gameData.fieldWidth;
       this.fieldHeight = gameData.fieldHeight;
       this.waitingForPlayer = gameData.waitingForPlayer;
-      this.winner = gameData.winner;
+      this.winnerId = gameData.winnerId;
       this.planets = gameData.planets;
-      this.fleetTimeline = gameData.fleetTimeline;
-      this.turns = gameData.turns;
-      this.players = gameData.players;
+      this.fleetTimelineObj = gameData.fleetTimelineObj;
+      this.turnsObj = gameData.turnsObj;
+      this.playersObj = gameData.playersObj;
+      this.neutralPlanetCount = gameData.neutralPlanetCount;
     }
   }
 
@@ -74,7 +73,7 @@ export class Game {
   @Min(4)
   @Max(20)
   @IsOptional()
-  public fieldWidth?: number;
+  public fieldWidth!: number;
 
   @Column({
     type: "int",
@@ -84,7 +83,14 @@ export class Game {
   @Min(4)
   @Max(20)
   @IsOptional()
-  public fieldHeight?: number;
+  public fieldHeight!: number;
+
+  @Column({
+    type: "int",
+    nullable: false,
+    default: 0,
+  })
+  public neutralPlanetCount!: number;
 
   @Column({
     type: "varchar",
@@ -124,24 +130,27 @@ export class Game {
     nullable: false,
     default: -1,
   })
-  public waitingForPlayer?: number;
+  public waitingForPlayer!: number;
 
-  @OneToOne((type) => User)
-  @JoinColumn()
-  public winner?: User;
+  @Column({
+    type: "uuid",
+    nullable: true,
+    default: null,
+  })
+  public winnerId?: string | null;
 
   // TODO: may be switch to proper JSON?
-  @Column({ type: "simple-json", default: [] })
-  public players?: (User | ComputerPlayer)[];
+  @Column({ type: "simple-json", default: '{"players": []}' })
+  public playersObj!: { players: Player[] };
 
-  @Column({ type: "simple-json", default: {} })
-  public planets?: PlanetMap;
+  @Column({ type: "simple-json", default: "{}" })
+  public planets!: PlanetMap;
 
-  @Column({ type: "simple-json", default: [] })
-  public fleetTimeline?: Fleet[][];
+  @Column({ type: "simple-json", default: '{"fleetTimeline": []}' })
+  public fleetTimelineObj!: { fleetTimeline: Fleet[][] };
 
-  @Column({ type: "simple-json", default: [] })
-  public turns?: PlayerTurn[];
+  @Column({ type: "simple-json", default: '{"turns": []}' })
+  public turnsObj!: { turns: PlayerTurn[] };
 
   // Technical info
   @CreateDateColumn()
@@ -149,6 +158,9 @@ export class Game {
 
   @UpdateDateColumn()
   public updatedAt?: Date;
+
+  // post data
+  public initialPlayers?: PlayerIndexMap;
 
   // helpers
   public get fieldSize(): [number, number] {
@@ -182,4 +194,8 @@ export class Game {
         this.gameCompleted = false;
     }
   }
+}
+
+export interface PlayerIndexMap {
+  [index: string]: Player;
 }

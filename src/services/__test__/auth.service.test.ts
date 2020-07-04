@@ -2,8 +2,6 @@ import createTestConnection from "../../testhelpers/createTestConnection";
 import { AuthService } from "../auth.service";
 import { UsersService } from "../users.service";
 import { User } from "../../dao/entities/user";
-import { HttpException } from "../../exceptions/httpException";
-import ValidationException from "../../exceptions/validationException";
 import { NOT_FOUND, UNAUTHORIZED } from "http-status-codes";
 import { FakeMailer } from "../../testhelpers/fakemailer";
 import { MailerService } from "../mailer.service";

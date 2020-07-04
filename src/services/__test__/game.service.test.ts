@@ -1,6 +1,5 @@
 import { GameService } from "../game.service";
 import createTestConnection from "../../testhelpers/createTestConnection";
-import { GameStatus } from "../../gamelogic/Game";
 
 describe("GameService", () => {
   let gameService: GameService;

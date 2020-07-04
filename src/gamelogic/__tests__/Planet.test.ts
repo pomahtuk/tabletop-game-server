@@ -1,7 +1,6 @@
 import Planet, { produceFleets } from "../Planet";
-import Player from "../Player";
 
-const testPlayer = new Player();
+const testPlayer = "testPlayer";
 
 const coordinates = {
   x: 1,
@@ -17,7 +16,7 @@ describe("Planet", (): void => {
     expect(planet).toBeDefined();
 
     expect(planet.name).toBe(planetName);
-    expect(planet.owner).toBeNull();
+    expect(planet.owner).toBeFalsy();
     expect(planet.killPercent).toBeGreaterThanOrEqual(0.3);
     expect(planet.killPercent).toBeLessThanOrEqual(0.9);
     const production = planet.production;
@@ -38,7 +37,7 @@ describe("Planet", (): void => {
     expect(planet).toBeDefined();
 
     expect(planet.name).toBe(planetName);
-    expect(planet.owner).toMatchObject(testPlayer);
+    expect(planet.owner).toBe(testPlayer);
     expect(planet.killPercent).toBe(0.5);
 
     expect(planet.coordinates).toEqual(coordinates);
@@ -56,15 +55,24 @@ describe("Planet", (): void => {
     expect(planet.production).toBe(10);
     expect(planet.ships).toBe(10);
 
-    produceFleets(planet);
+    const statsMap = {
+      [testPlayer]: {
+        enemyShipsDestroyed: 0,
+        enemyFleetsDestroyed: 0,
+        shipCount: 0,
+        isDead: false,
+      },
+    };
+
+    produceFleets(planet, statsMap);
     expect(planet.ships).toBe(20);
-    expect(testPlayer.stats!.shipCount).toBe(10);
+    expect(statsMap[testPlayer].shipCount).toBe(10);
   });
 
   it("Planet could not produce ships without owner", (): void => {
     const planetName = "A";
     const planet = new Planet(planetName);
-    produceFleets(planet);
+    produceFleets(planet, {});
     expect(planet.ships).toBe(planet.production);
   });
 });

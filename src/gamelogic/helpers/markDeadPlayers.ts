@@ -1,18 +1,19 @@
-import Player from "../Player";
 import Planet, { PlanetMap } from "../Planet";
 import Fleet from "../Fleet";
-import { User } from "../../dao/entities/user";
+import { PlayerStatsMap } from "../Player";
 
 export interface MarkDeadPlayersOptions {
-  players: (Player | User)[];
+  players: string[];
   planets: PlanetMap;
   remainingTimeline: Fleet[][];
+  statsMap: PlayerStatsMap;
 }
 
 const markDeadPlayers = ({
   players,
   planets,
   remainingTimeline,
+  statsMap,
 }: MarkDeadPlayersOptions): void => {
   // dead - no planets owned and no fleets in future timeline
   const foundPlayerIds: Set<string> = new Set();
@@ -20,17 +21,17 @@ const markDeadPlayers = ({
     .map((planetName): Planet => planets[planetName])
     .forEach((planet): void => {
       if (planet.owner) {
-        foundPlayerIds.add(planet.owner.id);
+        foundPlayerIds.add(planet.owner);
       }
     });
   remainingTimeline.forEach((fleets): void => {
     fleets.forEach((fleet): void => {
-      foundPlayerIds.add(fleet.owner.id);
+      foundPlayerIds.add(fleet.owner);
     });
   });
   players.forEach((player): void => {
-    if (!foundPlayerIds.has(player.id)) {
-      player.stats!.isDead = true;
+    if (!foundPlayerIds.has(player)) {
+      statsMap[player].isDead = true;
     }
   });
 };

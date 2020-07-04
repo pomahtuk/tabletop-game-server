@@ -17,7 +17,7 @@ describe("ComputerPlayerEasy", (): void => {
   it("Can prepare turn data for attack", (): void => {
     const computer = new ComputerPlayerEasy(undefined, "test");
     const planets = {
-      A: new Planet("A", computer, { x: 0, y: 0 }),
+      A: new Planet("A", computer.id, { x: 0, y: 0 }),
       B: new Planet("B", null, { x: 1, y: 1 }),
     };
 
@@ -29,8 +29,8 @@ describe("ComputerPlayerEasy", (): void => {
   it("Can prepare turn data for reinforcements", (): void => {
     const computer = new ComputerPlayerEasy(undefined, "test");
     const planets = {
-      A: new Planet("A", computer, { x: 0, y: 0 }),
-      B: new Planet("B", computer, { x: 1, y: 1 }),
+      A: new Planet("A", computer.id, { x: 0, y: 0 }),
+      B: new Planet("B", computer.id, { x: 1, y: 1 }),
     };
 
     planets.A.ships = 22;

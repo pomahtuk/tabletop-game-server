@@ -1,16 +1,14 @@
-import Player from "./Player";
-
 export interface FleetParams {
   amount: number;
   killPercent?: number;
-  owner: Player;
+  owner: string;
   destination: string;
 }
 
 export default class Fleet {
   public amount: number;
   public killPercent: number;
-  public owner: Player;
+  public owner: string;
   public destination: string;
 
   public constructor({

@@ -1,35 +1,70 @@
-import ConquestGame, { addPlayerTurnData } from "../../Game";
-import Player from "../../Player";
-
-const player1 = new Player();
-const player2 = new Player();
+import { GameStatus } from "../../Game";
+import { UsersService } from "../../../services/users.service";
+import { GameService } from "../../../services/game.service";
+import createTestConnection from "../../../testhelpers/createTestConnection";
+import { GameplayService } from "../../../services/gameplay.service";
+import { User } from "../../../dao/entities/user";
+import { getRepository, Repository } from "typeorm";
+import { GameUserStats } from "../../../dao/entities/gameuserstats";
 
 describe("Main game", (): void => {
-  it("Exposing maximum and minimum parameters", (): void => {
-    const { maxPlayers, minPlayers, maxSize, minSize } = ConquestGame;
-    expect(maxPlayers).toBe(4);
-    expect(minPlayers).toBe(2);
-    expect(maxSize).toBe(20);
-    expect(minSize).toBe(4);
-  });
+  let gameplayService: GameplayService;
+  let gameService: GameService;
+  let statsRepo: Repository<GameUserStats>;
 
-  it("Creates a new game with given params", (): void => {
-    const game = new ConquestGame({
+  let player1: User;
+  let player2: User;
+  let player3: User;
+
+  let gameId: string;
+
+  beforeAll(
+    async (): Promise<void> => {
+      await createTestConnection();
+      let usersService = new UsersService();
+      gameService = new GameService();
+
+      // create two users
+      player1 = await usersService.createUser({
+        username: "game_base_1",
+        password: "sample_pwd1",
+        email: "game.base.1@example.com",
+      });
+
+      player2 = await usersService.createUser({
+        username: "game_base_2",
+        password: "sample_pwd2",
+        email: "game.base.2@example.com",
+      });
+
+      player3 = await usersService.createUser({
+        username: "game_base_3",
+        password: "sample_pwd3",
+        email: "game.base.3@example.com",
+      });
+
+      gameplayService = new GameplayService(gameService, usersService);
+
+      statsRepo = getRepository(GameUserStats);
+    }
+  );
+
+  it("Creates a new game with given params", async (): Promise<void> => {
+    const game = await gameplayService.createGame({
       fieldHeight: 10,
       fieldWidth: 10,
+      numPlayers: 2,
       neutralPlanetCount: 5,
-      players: [player1, player2],
     });
 
     expect(game).toBeDefined();
 
     // get data
-    const players = game.players;
+    const players = game.playersObj.players;
     const planets = game.planets;
 
     // check we have all players
-    expect(players).toBeDefined();
-    expect(players!.length).toBe(2);
+    expect(game.playersObj).toBeDefined();
 
     // check we have planets generated
     expect(planets).toBeDefined();
@@ -37,69 +72,91 @@ describe("Main game", (): void => {
     expect(planets["A"].coordinates).toBeDefined();
     expect(planets["B"].coordinates).toBeDefined();
 
-    // now make sure we don't have turns from start
-    expect(game.turns.length).toBe(0);
-  });
+    // make sure game is not started
+    expect(game.gameStarted).toBe(false);
+    expect(game.gameCompleted).toBe(false);
 
-  it("Creates a new game with given params and exposing fieldSize", (): void => {
-    const game = new ConquestGame({
-      fieldHeight: 10,
-      fieldWidth: 10,
-      neutralPlanetCount: 5,
-      players: [player1, player2],
-    });
+    // make sure status shortcut working
+    expect(game.status).toBe(GameStatus.NOT_STARTED);
 
-    expect(game).toBeDefined();
+    // exposing fieldSize
     expect(game.fieldSize).toMatchObject([10, 10]);
+
+    gameId = game.id!;
   });
 
-  it("Able to mark player dead and ignore it for next one", (): void => {
-    const player3 = new Player(undefined);
-    const game = new ConquestGame({
+  it("Able to add player", async (): Promise<void> => {
+    const game = await gameplayService.addPlayer(gameId, player1);
+    // game should not be started at this moment
+    expect(game.status).toBe(GameStatus.NOT_STARTED);
+    // we should have additional user
+    expect(game.playersObj.players).toHaveLength(1);
+    expect(game.users).toHaveLength(1);
+    // planet should be assigned
+    expect(game.planets["A"].owner).toBe(player1.id);
+  });
+
+  it("Able to add player and start a game", async (): Promise<void> => {
+    const game = await gameplayService.addPlayer(gameId, player2);
+    // game should not be started at this moment
+    expect(game.status).toBe(GameStatus.IN_PROGRESS);
+    // we should have additional user
+    expect(game.playersObj.players).toHaveLength(2);
+    expect(game.users).toHaveLength(2);
+    // planet should be assigned
+    expect(game.planets["B"].owner).toBe(player2.id);
+    expect(game.waitingForPlayer).toBe(0);
+  });
+
+  it("Able to mark player dead and ignore it for next one", async (): Promise<
+    void
+  > => {
+    const game = await gameplayService.createGame({
       fieldHeight: 4,
       fieldWidth: 4,
+      numPlayers: 3,
       neutralPlanetCount: 1,
-      players: [player1, player2, player3],
+      initialPlayers: {
+        "0": player1,
+        "1": player2,
+        "2": player3,
+      },
     });
-    const assaultPlayer2 = (): void => {
-      addPlayerTurnData(game, {
-        player: player1,
-        orders: [
-          {
-            amount: 10,
-            origin: "A",
-            destination: "B",
-          },
-        ],
-      });
-      addPlayerTurnData(game, {
-        player: player2,
-        orders: [],
-      });
-      addPlayerTurnData(game, {
-        player: player3,
-        orders: [
-          {
-            amount: 10,
-            origin: "C",
-            destination: "B",
-          },
-        ],
-      });
+
+    const assaultPlayer2 = async (): Promise<void> => {
+      // step one - everyone waiting
+      await gameplayService.takePlayerTurn(game.id!, player1.id, []);
+      await gameplayService.takePlayerTurn(game.id!, player2.id, []);
+      await gameplayService.takePlayerTurn(game.id!, player3.id, []);
+      // step two - attacking player2
+      await gameplayService.takePlayerTurn(game.id!, player1.id, [
+        {
+          amount: 20,
+          origin: "A",
+          destination: "B",
+        },
+      ]);
+      await gameplayService.takePlayerTurn(game.id!, player2.id, []);
+      await gameplayService.takePlayerTurn(game.id!, player3.id, [
+        {
+          amount: 20,
+          origin: "C",
+          destination: "B",
+        },
+      ]);
     };
-    assaultPlayer2();
+    await assaultPlayer2();
     // at this point turn should be complete
-    // player2 dead and we are waiting for player1
     expect(game.waitingForPlayer).toBe(0);
-    if (!player2.stats!.isDead) {
-      assaultPlayer2();
-    }
-    expect(player2.stats!.isDead).toBe(true);
-    addPlayerTurnData(game, {
-      player: player1,
-      orders: [],
+    // check if player2 is dead
+    const stats = await statsRepo.find({
+      gameId: game.id!,
     });
-    // we should skip player2 because of dead status
-    expect(game.waitingForPlayer).toBe(2);
+    expect(stats.find((p) => p.userId === player2.id)!.isDead).toBe(true);
+    // now empty player1 turn
+    await gameplayService.takePlayerTurn(game.id!, player1.id, []);
+    // get game
+    const updatedGame = await gameService.getGame(game.id!);
+    expect(updatedGame.waitingForPlayer).toBe(2);
   });
 });

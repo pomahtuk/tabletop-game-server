@@ -42,8 +42,8 @@ describe("ComputerPlayer", (): void => {
       "A",
       [],
       [
-        { owner: computer, destination: "A", amount: 10, killPercent: 0.5 },
-        { owner: computer, destination: "B", amount: 10, killPercent: 0.5 },
+        { owner: computer.id, destination: "A", amount: 10, killPercent: 0.5 },
+        { owner: computer.id, destination: "B", amount: 10, killPercent: 0.5 },
       ]
     );
     expect(shouldDueToFleets).toBe(true);
@@ -64,7 +64,7 @@ describe("ComputerPlayer", (): void => {
       "test",
       ComputerPlayerType.EASY
     );
-    const planetC = new Planet("C", computer, { x: 0, y: 0 });
+    const planetC = new Planet("C", computer.id, { x: 0, y: 0 });
     planetC.ships = 100;
     const planetA = new Planet("A", null, { x: 0, y: 0 });
     const planetB = new Planet("B", null, { x: 0, y: 0 });
@@ -75,7 +75,7 @@ describe("ComputerPlayer", (): void => {
         B: planetB,
         C: planetC,
       },
-      [{ owner: computer, destination: "A", amount: 10, killPercent: 0.5 }]
+      [{ owner: computer.id, destination: "A", amount: 10, killPercent: 0.5 }]
     );
     expect(turnData).toHaveLength(1);
     expect(turnData[0].destination).toBe("B");
@@ -87,12 +87,12 @@ describe("ComputerPlayer", (): void => {
       "test",
       ComputerPlayerType.EASY
     );
-    const planetC = new Planet("C", computer, { x: 0, y: 0 });
+    const planetC = new Planet("C", computer.id, { x: 0, y: 0 });
     planetC.ships = 100;
-    const planetD = new Planet("D", computer, { x: 0, y: 0 });
+    const planetD = new Planet("D", computer.id, { x: 0, y: 0 });
     planetD.ships = 100;
-    const planetA = new Planet("A", computer, { x: 0, y: 0 });
-    const planetB = new Planet("B", computer, { x: 0, y: 0 });
+    const planetA = new Planet("A", computer.id, { x: 0, y: 0 });
+    const planetB = new Planet("B", computer.id, { x: 0, y: 0 });
     const turnData = takeTurn(
       computer,
       {

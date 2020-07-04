@@ -1,6 +1,3 @@
-import { v4 as uuid } from "uuid";
-import { User } from "../dao/entities/user";
-
 export interface PlayerTurnOrder {
   origin: string;
   destination: string;
@@ -8,7 +5,7 @@ export interface PlayerTurnOrder {
 }
 
 export interface PlayerTurn {
-  player: Player | User;
+  playerId: string;
   orders: PlayerTurnOrder[];
 }
 
@@ -19,18 +16,12 @@ export interface PlayerStats {
   isDead: boolean;
 }
 
-export default class Player {
-  public id: string;
-  public stats?: PlayerStats;
-  public isComputer = false;
+export interface PlayerStatsMap {
+  [key: string]: PlayerStats;
+}
 
-  public constructor(id: string = uuid()) {
-    this.id = id;
-    this.stats = {
-      enemyShipsDestroyed: 0,
-      enemyFleetsDestroyed: 0,
-      shipCount: 0,
-      isDead: false,
-    };
-  }
+export interface Player {
+  id: string;
+  isComputer: boolean;
+  username?: string;
 }

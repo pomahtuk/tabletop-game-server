@@ -1,12 +1,12 @@
 import { GameService } from "./game.service";
 import { UsersService } from "./users.service";
 import { User } from "../dao/entities/user";
-import ComputerPlayer from "../gamelogic/ComputerPlayer";
-import { PlayerStats, PlayerTurn } from "../gamelogic/Player";
-import { Game } from "../dao/entities/game";
-import ConquestGame, {
+import { Player, PlayerStatsMap, PlayerTurnOrder } from "../gamelogic/Player";
+import { Game, PlayerIndexMap } from "../dao/entities/game";
+import {
   addPlayerTurnData,
   findNextValidPlayer,
+  GameStatus,
   TurnStatus,
 } from "../gamelogic/Game";
 import { HttpException } from "../exceptions/httpException";
@@ -14,7 +14,15 @@ import { BAD_REQUEST } from "http-status-codes";
 import Planet from "../gamelogic/Planet";
 import getPlanetName from "../gamelogic/helpers/getPlanetName";
 import { GameUserStats } from "../dao/entities/gameuserstats";
-import { getRepository, Repository } from "typeorm";
+import { getManager, getRepository, Repository } from "typeorm";
+import placePlanets from "../gamelogic/helpers/placePlanets";
+
+const defaultPlayerStats = {
+  enemyShipsDestroyed: 0,
+  enemyFleetsDestroyed: 0,
+  shipCount: 0,
+  isDead: false,
+};
 
 export class GameplayService {
   private gameService: GameService;
@@ -27,54 +35,174 @@ export class GameplayService {
     this.statsRepo = getRepository(GameUserStats);
   }
 
-  // public startGame() {
-  //   // we actually ready to go no players left to be added
-  //   // generate game field, assign planets
-  // }
+  public async createGame(gameData: Partial<Game>): Promise<Game> {
+    if (
+      gameData.initialPlayers &&
+      Object.values(gameData.initialPlayers).length > gameData.numPlayers!
+    ) {
+      throw new HttpException(
+        "Sent more initial players than game supports",
+        BAD_REQUEST
+      );
+    }
+
+    // create game
+    let game = await this.gameService.createGame(gameData);
+
+    // add all planets and place them
+    const totalPlanets = game.neutralPlanetCount + game.numPlayers;
+    for (let i = 0; i < totalPlanets; i++) {
+      // adding dummy ID just to reserve planet for player
+      const planet = new Planet(
+        getPlanetName(i),
+        i < game.numPlayers ? "dummy" : undefined
+      );
+      game.planets[planet.name] = planet;
+    }
+
+    // arrange planets
+    placePlanets({
+      planets: game.planets,
+      fieldHeight: game.fieldHeight,
+      fieldWidth: game.fieldWidth,
+      planetCount: totalPlanets,
+    });
+
+    await getManager().transaction(async (transactionalEntityManager) => {
+      // need this to generate id first;
+      game = await transactionalEntityManager.save(game);
+      if (gameData.initialPlayers) {
+        const stats = this.addPlayers(game, gameData.initialPlayers);
+        await transactionalEntityManager.save(stats);
+        game = await transactionalEntityManager.save(game);
+      }
+    });
+
+    return game;
+  }
+
+  private addPlayers(
+    game: Game,
+    playerIndexMap: PlayerIndexMap
+  ): GameUserStats[] {
+    const stats: GameUserStats[] = [];
+    // make sure to initialize if empty
+    game.playersObj.players = game.playersObj.players || [];
+    const players = game.playersObj.players;
+    // make sure to initialize if empty
+    game.users = game.users || [];
+    Object.keys(playerIndexMap).forEach((key) => {
+      const playerIndex = parseInt(key, 10);
+      const player = playerIndexMap[playerIndex];
+      players[playerIndex] = player.isComputer
+        ? player
+        : GameplayService.cleanUpUser(player as User);
+      const playerPlanetName = getPlanetName(playerIndex);
+      game.planets[playerPlanetName].owner = player.id;
+      stats.push(
+        new GameUserStats({
+          gameId: game.id!,
+          userId: player.id,
+          stats: defaultPlayerStats,
+        })
+      );
+      if (!player.isComputer) {
+        game.users.push(player as User);
+      }
+    });
+
+    if (game.numPlayers === players.length) {
+      game.status = GameStatus.IN_PROGRESS;
+      findNextValidPlayer(
+        game,
+        stats.reduce((acc: PlayerStatsMap, stat) => {
+          acc[stat.userId] = stat;
+          return acc;
+        }, {})
+      );
+    }
+
+    return stats;
+  }
 
   public async addPlayer(
     gameId: string,
-    player: ComputerPlayer | User,
+    player: User,
     gameCode?: string
   ): Promise<Game> {
-    const game = await this.gameService.getGame(gameId, gameCode);
-    const players = game.players ?? [];
-    const playerStats: PlayerStats = {
-      enemyShipsDestroyed: 0,
-      enemyFleetsDestroyed: 0,
-      shipCount: 0,
-      isDead: false,
-    };
-    player.stats = playerStats;
-    players.push(player);
-    // create player planet
-    const playerPlanet = new Planet(getPlanetName(players.length - 1), player);
-    const planets = game.planets ?? {};
-    planets[playerPlanet.name] = playerPlanet;
-    if (!player.isComputer) {
-      const stats = new GameUserStats(gameId, player.id!, playerStats);
-      // TODO: error handling
-      await this.statsRepo.save(stats);
-      game.users.push(player as User);
-    }
-    game.planets = planets;
-    game.players = players;
+    let game = await this.gameService.getGame(gameId, gameCode);
+    const players = game.playersObj.players || [];
+    const playerIndex = players.length;
+    players.push(GameplayService.cleanUpUser(player));
+    game.playersObj.players = players;
+    const playerPlanetName = getPlanetName(playerIndex);
+    game.planets[playerPlanetName].owner = player.id;
+    const userStat = new GameUserStats({
+      gameId,
+      userId: player.id,
+      stats: defaultPlayerStats,
+    });
+    game.users.push(player);
     // if we have everyone - start immediately
-    if (game.numPlayers === game.players.length) {
-      // add neutral planets
-      // findNextValidPlayer(game);
+    let stats: PlayerStatsMap = {};
+    if (game.numPlayers === game.playersObj.players.length) {
+      game.status = GameStatus.IN_PROGRESS;
+      const dbStats = await this.getPlayerStatsMap(gameId);
+      stats = {
+        ...dbStats,
+        [player.id]: userStat,
+      };
+      // this actually starts the game
+      findNextValidPlayer(game, stats);
     }
-    return await this.gameService.saveGame(game);
+
+    await getManager().transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.save(Object.values(stats));
+      game = await transactionalEntityManager.save(game);
+    });
+
+    return game;
   }
 
-  public async takePlayerTurn(gameId: string, turnData: PlayerTurn) {
+  private async getPlayerStatsMap(gameId: string) {
+    // TODO: error handling
+    const gameStats = await this.statsRepo.find({
+      gameId: gameId,
+    });
+    return gameStats.reduce((acc: PlayerStatsMap, stat) => {
+      acc[stat.userId] = stat;
+      return acc;
+    }, {});
+  }
+
+  private static cleanUpUser(user: User): Player {
+    return {
+      id: user.id,
+      isComputer: user.isComputer || false,
+      username: user.username,
+    };
+  }
+
+  public async takePlayerTurn(
+    gameId: string,
+    playerId: string,
+    orders: PlayerTurnOrder[]
+  ): Promise<TurnStatus> {
     const game = await this.gameService.getGame(gameId);
-    // const turnStatus : TurnStatus = addPlayerTurnData(game as ConquestGame, turnData);
-    // if (turnStatus === TurnStatus.INVALID) {
-    //   throw new HttpException("Turn data invalid", BAD_REQUEST);
-    // }
-    // main method to actually play game
-    // make sure turn valid
-    // check game status afterwards
+    const stats = await this.getPlayerStatsMap(gameId);
+    const turnStatus: TurnStatus = addPlayerTurnData(
+      game,
+      { playerId, orders },
+      stats
+    );
+    if (turnStatus === TurnStatus.INVALID) {
+      throw new HttpException("Turn data invalid", BAD_REQUEST);
+    }
+    // TODO: error handling
+    await getManager().transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.save(game);
+      await transactionalEntityManager.save(Object.values(stats));
+    });
+    return turnStatus;
   }
 }
