@@ -171,10 +171,6 @@ export const addPlayerTurnData = (
   if (!result.valid) {
     return TurnStatus.INVALID;
   }
-  // mark game as in progress if it is not started yet
-  if (game.status === GameStatus.NOT_STARTED) {
-    game.status = GameStatus.IN_PROGRESS;
-  }
   // check if we already have some data for this turn
   addDataToTurn(game, data);
   // update pointer to player we are waiting for

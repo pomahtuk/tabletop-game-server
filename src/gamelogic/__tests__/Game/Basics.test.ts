@@ -49,6 +49,28 @@ describe("Main game", (): void => {
     }
   );
 
+  it("Throwing an error if initialPlayers have more keys than numPlayers", async (): Promise<
+    void
+  > => {
+    expect.assertions(2);
+    try {
+      await gameplayService.createGame({
+        fieldWidth: 10,
+        fieldHeight: 10,
+        numPlayers: 2,
+        neutralPlanetCount: 0,
+        initialPlayers: {
+          "0": { id: "0", isComputer: true },
+          "1": { id: "1", isComputer: true },
+          "2": { id: "2", isComputer: true },
+        },
+      });
+    } catch (e) {
+      expect(e).toBeDefined();
+      expect(e.message).toMatch("Sent more initial players than game supports");
+    }
+  });
+
   it("Creates a new game with given params", async (): Promise<void> => {
     const game = await gameplayService.createGame({
       fieldHeight: 10,
@@ -60,7 +82,6 @@ describe("Main game", (): void => {
     expect(game).toBeDefined();
 
     // get data
-    const players = game.playersObj.players;
     const planets = game.planets;
 
     // check we have all players

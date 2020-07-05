@@ -29,6 +29,9 @@ describe("GameService", () => {
 
   it("Can create game", async (): Promise<void> => {
     const created = await gameService.createGame({
+      fieldHeight: 10,
+      fieldWidth: 10,
+      neutralPlanetCount: 0,
       numPlayers: 2,
       users: [],
     });
@@ -41,6 +44,9 @@ describe("GameService", () => {
   it("Can create private game", async (): Promise<void> => {
     const created = await gameService.createGame({
       isPublic: false,
+      fieldHeight: 10,
+      fieldWidth: 10,
+      neutralPlanetCount: 0,
       numPlayers: 2,
       gameCode,
       users: [],
@@ -100,6 +106,9 @@ describe("GameService", () => {
 
   it("Can delete game", async (): Promise<void> => {
     const game = await gameService.createGame({
+      fieldHeight: 10,
+      fieldWidth: 10,
+      neutralPlanetCount: 0,
       users: [],
       numPlayers: 2,
     });
@@ -118,6 +127,4 @@ describe("GameService", () => {
       expect(exception.message).toBe("Game with this id does not exist");
     }
   });
-
-  // check updating game
 });

@@ -32,6 +32,7 @@ describe("MailerService", (): void => {
   it("Can send password reset email", async (): Promise<void> => {
     let result = await mailerService.sendResetEmail({
       id: "test",
+      isComputer: false,
       username: "test",
       password: "none",
       email: "pman89@ya.ru",
@@ -45,6 +46,7 @@ describe("MailerService", (): void => {
   it("Can send activation email", async (): Promise<void> => {
     let result = await mailerService.sendActivationEmail({
       id: "test",
+      isComputer: false,
       username: "test",
       password: "none",
       email: "pman89@ya.ru",

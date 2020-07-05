@@ -1,15 +1,13 @@
 import { DeleteResult, getRepository, Repository } from "typeorm";
 import { Game } from "../dao/entities/game";
 import { HttpException } from "../exceptions/httpException";
-import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from "http-status-codes";
-import { validate } from "class-validator";
-import ValidationException from "../exceptions/validationException";
+import { BAD_REQUEST, FORBIDDEN, NOT_FOUND } from "http-status-codes";
+import getPlanetLimit from "../gamelogic/helpers/getPlanetLimit";
 
 export interface GetGamesOptions {
   page?: number;
   limit?: number;
   isPublic?: boolean;
-  gameStarted?: boolean;
   order?: {
     [K in keyof Game]?: "ASC" | "DESC" | 1 | -1;
   };
@@ -23,7 +21,7 @@ export class GameService {
   }
 
   public getGames(
-    { page = 0, limit = 10, isPublic, gameStarted, order }: GetGamesOptions = {
+    { page = 0, limit = 10, isPublic, order }: GetGamesOptions = {
       page: 0,
       limit: 10,
     }
@@ -35,10 +33,6 @@ export class GameService {
 
     if (isPublic !== undefined) {
       where.isPublic = isPublic;
-    }
-
-    if (gameStarted !== undefined) {
-      where.gameStarted = gameStarted;
     }
 
     return this.repo.find({
@@ -66,62 +60,83 @@ export class GameService {
 
   public createGame(newGame: Partial<Game>): Promise<Game> {
     // TODO: validate Game
+    if (
+      !newGame.fieldHeight ||
+      !newGame.fieldWidth ||
+      newGame.fieldWidth < 4 ||
+      newGame.fieldWidth > 20 ||
+      newGame.fieldHeight < 4 ||
+      newGame.fieldHeight > 20
+    ) {
+      // 1 - field size
+      throw new HttpException("Incorrect or missing field size", BAD_REQUEST);
+    }
+
+    if (
+      !newGame.numPlayers ||
+      newGame.numPlayers < 2 ||
+      newGame.numPlayers > 4
+    ) {
+      // 2 - num players
+      throw new HttpException(
+        "Incorrect or missing number of players",
+        BAD_REQUEST
+      );
+    }
+
+    // 3 - planet count
+    if (
+      !newGame.hasOwnProperty("neutralPlanetCount") ||
+      typeof newGame.neutralPlanetCount === "undefined" ||
+      newGame.neutralPlanetCount < 0
+    ) {
+      throw new HttpException("Missing number of neutral planets", BAD_REQUEST);
+    }
+
+    const neutralPlanetsLimit = getPlanetLimit(
+      newGame.fieldHeight * newGame.fieldWidth,
+      newGame.numPlayers
+    );
+    if (newGame.neutralPlanetCount > neutralPlanetsLimit) {
+      throw new HttpException(
+        `Too many neutral planets requested, limit for current field size: ${neutralPlanetsLimit}`,
+        BAD_REQUEST
+      );
+    }
+
+    if (
+      newGame.hasOwnProperty("gameStarted") ||
+      newGame.hasOwnProperty("gameCompleted") ||
+      newGame.hasOwnProperty("status")
+    ) {
+      // game status - should not be there
+      throw new HttpException(
+        "Setting game status is not allowed",
+        BAD_REQUEST
+      );
+    }
+
+    if (newGame.hasOwnProperty("winnerId")) {
+      // winnerId - should not be there
+      throw new HttpException(
+        "Setting winner id right away is not allowed",
+        BAD_REQUEST
+      );
+    }
+
+    if (newGame.hasOwnProperty("waitingForPlayer")) {
+      // waitingForPlayer - should not be there
+      throw new HttpException(
+        "Setting waitingForPlayer is not allowed",
+        BAD_REQUEST
+      );
+    }
+
     const game = this.repo.create(newGame);
     return this.repo.save(game);
   }
 
   public deleteGame(gameId: string): Promise<DeleteResult> {
     return this.repo.delete(gameId);
-  }
-
-  public async updateGame(gameId: string, gameData: Game): Promise<Game> {
-    // prevent overriding of Id;
-    if (gameData.id && gameData.id !== gameId) {
-      throw new HttpException("Changing Game id is forbidden", FORBIDDEN);
-    }
-    const gameInstance = await GameService.validateIncomingGame(gameData);
-    const game = await this.getGame(gameId);
-    try {
-      this.repo.merge(game, gameInstance);
-      return this.repo.save(game);
-    } catch (error) {
-      // NOTE: ignoring branch not corresponding to expected exception as other exceptions
-      // are not supposed to happen anw will be an indication of DB issue, so, external dependency
-      /* istanbul ignore next */
-      throw new HttpException(
-        "Something went wrong",
-        INTERNAL_SERVER_ERROR,
-        error
-      );
-    }
-  }
-
-  public async saveGame(game: Game): Promise<Game> {
-    try {
-      await GameService.validateGameInstance(game);
-      return await this.repo.save(game);
-    } catch (error) {
-      // NOTE: ignoring branch not corresponding to expected exception as other exceptions
-      // are not supposed to happen anw will be an indication of DB issue, so, external dependency
-      /* istanbul ignore next */
-      throw new HttpException(
-        "Something went wrong",
-        INTERNAL_SERVER_ERROR,
-        error
-      );
-    }
-  }
-
-  private static async validateIncomingGame(gameData: Game): Promise<Game> {
-    const gameInstance = new Game(gameData);
-    return await GameService.validateGameInstance(gameInstance);
-  }
-
-  private static async validateGameInstance(gameInstance: Game): Promise<Game> {
-    const validationErrors = await validate(gameInstance);
-    if (validationErrors.length > 0) {
-      throw new ValidationException("Game is not valid", validationErrors);
-    }
-    return gameInstance;
   }
 }

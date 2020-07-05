@@ -9,36 +9,13 @@ import {
 } from "typeorm";
 
 import { User } from "./user";
-import { IsBoolean, IsOptional, Length, Max, Min } from "class-validator";
 import { PlanetMap } from "../../gamelogic/Planet";
 import Fleet from "../../gamelogic/Fleet";
 import { Player, PlayerTurn } from "../../gamelogic/Player";
 import { GameStatus } from "../../gamelogic/Game";
 
-// Game with bots should be possible
-
 @Entity()
 export class Game {
-  constructor(gameData?: Game) {
-    if (gameData) {
-      this.isPublic = gameData.isPublic;
-      this.numPlayers = gameData.numPlayers;
-      this.gameCode = gameData.gameCode;
-      this.users = gameData.users;
-      this.gameStarted = gameData.gameStarted;
-      this.gameCompleted = gameData.gameCompleted;
-      this.fieldWidth = gameData.fieldWidth;
-      this.fieldHeight = gameData.fieldHeight;
-      this.waitingForPlayer = gameData.waitingForPlayer;
-      this.winnerId = gameData.winnerId;
-      this.planets = gameData.planets;
-      this.fleetTimelineObj = gameData.fleetTimelineObj;
-      this.turnsObj = gameData.turnsObj;
-      this.playersObj = gameData.playersObj;
-      this.neutralPlanetCount = gameData.neutralPlanetCount;
-    }
-  }
-
   @PrimaryGeneratedColumn("uuid")
   public id?: string;
 
@@ -47,8 +24,6 @@ export class Game {
     nullable: false,
     default: true,
   })
-  @IsOptional()
-  @IsBoolean()
   public isPublic?: boolean;
 
   @Column({
@@ -56,13 +31,6 @@ export class Game {
     nullable: false,
     default: 2,
   })
-  @Min(2, {
-    message: "Minimum 2 players required",
-  })
-  @Max(4, {
-    message: "Maximum 4 players allowed",
-  })
-  // validate
   public numPlayers!: number;
 
   @Column({
@@ -70,9 +38,6 @@ export class Game {
     nullable: false,
     default: 4,
   })
-  @Min(4)
-  @Max(20)
-  @IsOptional()
   public fieldWidth!: number;
 
   @Column({
@@ -80,9 +45,6 @@ export class Game {
     nullable: false,
     default: 4,
   })
-  @Min(4)
-  @Max(20)
-  @IsOptional()
   public fieldHeight!: number;
 
   @Column({
@@ -97,10 +59,6 @@ export class Game {
     nullable: true,
     default: null,
   })
-  @IsOptional()
-  @Length(4, 255, {
-    message: "Must be between 4 and 255 characters long",
-  })
   public gameCode?: string | null;
 
   @ManyToMany(() => User)
@@ -112,8 +70,6 @@ export class Game {
     nullable: false,
     default: false,
   })
-  @IsOptional()
-  @IsBoolean()
   public gameStarted?: boolean;
 
   @Column({
@@ -121,8 +77,6 @@ export class Game {
     nullable: false,
     default: false,
   })
-  @IsOptional()
-  @IsBoolean()
   public gameCompleted?: boolean;
 
   @Column({
@@ -164,7 +118,7 @@ export class Game {
 
   // helpers
   public get fieldSize(): [number, number] {
-    return [this.fieldHeight ?? 0, this.fieldWidth ?? 0];
+    return [this.fieldHeight, this.fieldWidth];
   }
 
   public get status(): GameStatus {
@@ -189,9 +143,9 @@ export class Game {
         this.gameStarted = true;
         this.gameCompleted = false;
         break;
-      case GameStatus.NOT_STARTED:
-        this.gameStarted = false;
-        this.gameCompleted = false;
+      default:
+        // we are ignoring GameStatus.NOT_STARTED as we dont' expect this to be set programmatically
+        break;
     }
   }
 }
