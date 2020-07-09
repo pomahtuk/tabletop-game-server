@@ -94,16 +94,16 @@ export class Game {
   public winnerId?: string | null;
 
   // TODO: may be switch to proper JSON?
-  @Column({ type: "simple-json", default: '{"players": []}' })
+  @Column({ type: "simple-json" })
   public playersObj!: { players: Player[] };
 
-  @Column({ type: "simple-json", default: "{}" })
+  @Column({ type: "simple-json" })
   public planets!: PlanetMap;
 
-  @Column({ type: "simple-json", default: '{"fleetTimeline": []}' })
+  @Column({ type: "simple-json" })
   public fleetTimelineObj!: { fleetTimeline: Fleet[][] };
 
-  @Column({ type: "simple-json", default: '{"turns": []}' })
+  @Column({ type: "simple-json" })
   public turnsObj!: { turns: PlayerTurn[] };
 
   // Technical info
