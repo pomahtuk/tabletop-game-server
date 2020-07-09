@@ -16,6 +16,13 @@ import { GameStatus } from "../../gamelogic/Game";
 
 @Entity()
 export class Game {
+  constructor() {
+    this.playersObj = { players: [] };
+    this.planets = {};
+    this.fleetTimelineObj = { fleetTimeline: [] };
+    this.turnsObj = { turns: [] };
+  }
+
   @PrimaryGeneratedColumn("uuid")
   public id?: string;
 
