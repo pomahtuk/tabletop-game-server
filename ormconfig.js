@@ -1,4 +1,4 @@
-const ormconfig = require("./dist/ormconfig");
+const ormconfig = require("./dist/server/ormconfig");
 
 module.exports = {
   ...ormconfig.OrmConfig,
