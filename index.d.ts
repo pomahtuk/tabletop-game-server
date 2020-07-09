@@ -51,5 +51,12 @@ declare module "fastify" {
     orm: Connection;
     circuitBreaker: () => FastifyMiddleware;
     jwt: JWT;
+    auth(
+      functions: any[],
+      options?: {
+        relation?: "and" | "or";
+        run?: "all";
+      }
+    ): any;
   }
 }

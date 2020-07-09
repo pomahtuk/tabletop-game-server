@@ -4,6 +4,7 @@ import websocket from "fastify-websocket";
 import fastifyCookie from "fastify-cookie";
 import formBody from "fastify-formbody";
 import jwt from "fastify-jwt";
+import auth from "fastify-auth";
 
 import { OrmConfig } from "./ormconfig";
 
@@ -11,6 +12,7 @@ import statusRoutes from "./routes/status.routes";
 import gameRoutes from "./routes/game.routes";
 import userRoutes from "./routes/user.routes";
 import authRoutes from "./routes/auth.routes";
+import gameplayRoutes from "./routes/gameplay.routes";
 
 const IS_TEST = process.env.NODE_ENV === "test";
 
@@ -20,6 +22,7 @@ const server: fastify.FastifyInstance = fastify({
 
 // └── plugins (from the Fastify ecosystem)
 server.register(jwt, {
+  // TODO: use certificate files or env variables
   secret: "some secret super secret here",
   cookie: {
     cookieName: "token",
@@ -41,6 +44,7 @@ server.register(
 server.register(websocket);
 server.register(fastifyCookie);
 server.register(formBody);
+server.register(auth);
 // └── your plugins (your custom plugins)
 // └── decorators
 // └── hooks and middleware
@@ -50,6 +54,7 @@ server.register(statusRoutes);
 server.register(gameRoutes);
 server.register(userRoutes);
 server.register(authRoutes);
+server.register(gameplayRoutes);
 
 const start = async (port: number = IS_TEST ? 3001 : 3000) => {
   try {

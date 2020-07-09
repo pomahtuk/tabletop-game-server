@@ -37,7 +37,7 @@ export const UserInGameVerify = async (
   }
 };
 
-const getUserId = (user: JWTTypes.SignPayloadType): string => {
+export const getUserId = (user: JWTTypes.SignPayloadType): string => {
   // this is types issue, in fact request.user is an object
   return (user as any).id as string;
 };
