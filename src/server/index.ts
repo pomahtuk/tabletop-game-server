@@ -58,6 +58,11 @@ server.register(userRoutes);
 server.register(authRoutes);
 server.register(gameplayRoutes);
 
+server.setErrorHandler((error, req, reply) => {
+  req.log.error(error);
+  reply.send(error);
+});
+
 const start = async (port: number = IS_TEST ? 3001 : 3000) => {
   try {
     await server.listen(port, "0.0.0.0");

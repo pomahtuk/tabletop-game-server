@@ -35,27 +35,7 @@ const validateUserAndAction = (
       errors,
     };
   }
-  // username
-  if (!username || username.length < 4) {
-    valid = false;
-    errors = {
-      ...errors,
-      username: "Username must be present",
-    };
-  } else if (!username.match(usernameRegex)) {
-    valid = false;
-    errors = {
-      ...errors,
-      username:
-        "Username can only contain numbers, letters and symbols: . ! @ $ & ~ _",
-    };
-  } else if (username.length > 255) {
-    valid = false;
-    errors = {
-      ...errors,
-      username: "Username can not be longer than 255 characters",
-    };
-  }
+
   // password
   if (!password || password.length < 6) {
     valid = false;
@@ -75,6 +55,43 @@ const validateUserAndAction = (
     errors = {
       ...errors,
       password: "Password can not be longer than 255 characters",
+    };
+  }
+
+  if (action === "login") {
+    // email
+    if (!email || email.length < 3) {
+      errors = {
+        ...errors,
+        password: "Email must be present",
+      };
+    }
+
+    return {
+      valid,
+      errors,
+    };
+  }
+
+  // username
+  if (!username || username.length < 4) {
+    valid = false;
+    errors = {
+      ...errors,
+      username: "Username must be present",
+    };
+  } else if (!username.match(usernameRegex)) {
+    valid = false;
+    errors = {
+      ...errors,
+      username:
+        "Username can only contain numbers, letters and symbols: . ! @ $ & ~ _",
+    };
+  } else if (username.length > 255) {
+    valid = false;
+    errors = {
+      ...errors,
+      username: "Username can not be longer than 255 characters",
     };
   }
 

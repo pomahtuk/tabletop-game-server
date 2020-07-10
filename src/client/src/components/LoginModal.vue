@@ -6,9 +6,13 @@
           {{ title }}
         </div>
         <div class="partition-form">
+          <span v-if="userError" class="user-error">
+            {{userError}}
+          </span>
+          
           <form @keypress.enter="handleGo">
-            <TextInput v-if="variant !== 'login'" label="email" type="email" placeholder="Email" v-model="email" />
-            <TextInput v-if="variant !== 'restore'" label="username" type="text" placeholder="Username" v-model="username" />
+            <TextInput label="email" type="email" placeholder="Email" v-model="email" />
+            <TextInput v-if="variant === 'register'" label="username" type="text" placeholder="Username" v-model="username" />
             <TextInput v-if="variant !== 'restore'" label="password" type="password" placeholder="Password" v-model="password" />
           </form>
           
@@ -46,7 +50,7 @@
 </template>
 
 <script lang="ts">
-  import { Action } from "vuex-class";
+  import {Action, State} from "vuex-class";
 
   import { Component, Vue } from 'vue-property-decorator';
   import Button from "@/components/Button.vue";
@@ -71,6 +75,7 @@
     private password = "";
     private email = "";
 
+    @State("userError") userError?: string;
     @Action(actionTypes.LOGIN_USER) login!: (userData: UserData) => Promise<void>
     @Action(actionTypes.REGISTER_USER) register!: (userData: UserData) => Promise<void>
     
@@ -116,6 +121,7 @@
 
 <style lang="scss">
   $main-color: #65F6FF;
+  $accent-color: #F1338B;
   
   .vm--overlay {
     background: rgba(18, 16, 45, 0.8);
@@ -249,13 +255,25 @@
       }
       
       &.forgot-password {
-        color: #F1338B;
+        color: $accent-color;
         
         &:hover,
         &:active {
-          border-bottom: 1px solid #F1338B;
+          border-bottom: 1px solid $accent-color;
         }
       }
     }
+  }
+
+  .user-error {
+    display: block;
+    background: rgba(241, 51, 139, 0.2);
+    border: 1px solid $accent-color;
+    box-sizing: border-box;
+    backdrop-filter: blur(5px);
+    padding: 10px 20px;
+    margin-bottom: 15px;
+
+    color: $accent-color;
   }
 </style>
