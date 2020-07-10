@@ -5,6 +5,7 @@ import fastifyCookie from "fastify-cookie";
 import formBody from "fastify-formbody";
 import jwt from "fastify-jwt";
 import auth from "fastify-auth";
+import cors from "fastify-cors";
 
 import { OrmConfig } from "./ormconfig";
 
@@ -45,6 +46,7 @@ server.register(websocket);
 server.register(fastifyCookie);
 server.register(formBody);
 server.register(auth);
+server.register(cors);
 // └── your plugins (your custom plugins)
 // └── decorators
 // └── hooks and middleware

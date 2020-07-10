@@ -30,7 +30,7 @@ export default fp(async (fastify, _opts, next) => {
   fastify.route({
     url: "/auth/register",
     logLevel: "warn",
-    method: ["POST", "HEAD"],
+    method: "POST",
     schema: postUserSchema,
     handler: async (
       req: FastifyRequest,
@@ -47,7 +47,7 @@ export default fp(async (fastify, _opts, next) => {
   fastify.route({
     url: "/auth/activate/:code",
     logLevel: "warn",
-    method: ["POST", "HEAD"],
+    method: "POST",
     schema: postUserSchema,
     handler: async (
       req: FastifyRequest,
@@ -64,7 +64,7 @@ export default fp(async (fastify, _opts, next) => {
   fastify.route({
     url: "/auth/login",
     logLevel: "warn",
-    method: ["POST", "HEAD"],
+    method: "POST",
     handler: async (
       req: FastifyRequest,
       reply: FastifyReply<ServerResponse>
@@ -86,7 +86,7 @@ export default fp(async (fastify, _opts, next) => {
   fastify.route({
     url: "/auth/logout",
     logLevel: "warn",
-    method: ["GET", "HEAD"],
+    method: "POST",
     handler: async (
       req: FastifyRequest,
       reply: FastifyReply<ServerResponse>

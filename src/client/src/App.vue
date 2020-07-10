@@ -7,23 +7,43 @@
         space
       </div>
       <div class="nav-links">
-        <Button title="Start game" primary="true" />
-        <Button title="Log in" lines-inverse="true" />
+        <Button
+          v-if="user"
+          title="Start game"
+          primary="true"
+        />
+        <Button
+          v-if="!user"
+          title="Log in"
+          @click="$modal.show('login-modal')"
+          lines-inverse="true"
+        />
       </div>
     </div>
     <router-view />
     <div class="backdrop-after"></div>
+
+    <LoginModal />
+    
   </div>
 </template>
 
 <script lang="ts">
   import Button from '@/components/Button.vue'
+  import LoginModal from '@/components/LoginModal.vue'
 
-  export default {
-    name: 'App',
+  import { Component, Vue } from 'vue-property-decorator';
+  import { State } from "vuex-class";
+  import { User } from "@/store/state";
+
+  @Component({
     components: {
-      Button
+      Button,
+      LoginModal
     }
+  })
+  export default class App extends Vue {
+    @State user?: User;
   }
 </script>
 

@@ -27,10 +27,10 @@
       </table>
     </div>
 
-    <div class="left-top-line"></div>
-    <div class="left-line"></div>
-    <div class="right-bottom-line"></div>
-    <div class="bottom-line"></div>
+    <div class="left-top-line" />
+    <div class="left-line" />
+    <div class="right-bottom-line" />
+    <div class="bottom-line" />
   </div>
 </template>
 

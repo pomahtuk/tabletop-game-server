@@ -1,10 +1,13 @@
 <template>
-  <button v-bind:class="{'primary': primary, 'lines-inverse': linesInverse, 'glow': glow}">
+  <button 
+    @click="handleClick" 
+    v-bind:class="{'primary': primary, 'lines-inverse': linesInverse, 'glow': glow, 'wide': wide}"
+  >
     {{ title }}
-    <div class="line top-line"></div>
-    <div class="line bottom-line"></div>
-    <div class="line side-bottom-line"></div>
-    <div class="line side-top-line"></div>
+    <div class="line top-line" />
+    <div class="line bottom-line" />
+    <div class="line side-bottom-line"/>
+    <div class="line side-top-line"/>
   </button>
 </template>
 
@@ -17,6 +20,11 @@
     @Prop() private primary!: boolean;
     @Prop() private linesInverse!: boolean;
     @Prop() private glow!: boolean;
+    @Prop() private wide!: boolean;
+
+    handleClick() {
+      this.$emit('click');
+    }
   }
 </script>
 
@@ -26,7 +34,6 @@
 
   button {
     font-family: inherit;
-    padding: 0;
     color: inherit;
     font-style: normal;
     font-weight: normal;
@@ -47,7 +54,12 @@
     width: 150px;
     padding: 12px 0;
     
-    &:hover {
+    &.wide {
+      width: 100%;
+    }
+    
+    &:hover,
+    &:focus {
       background: rgba(101, 246, 255, 0.3);
       box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
     }
@@ -163,10 +175,13 @@
       box-shadow: 0 0 5px #99FEFF;
       color: #09AEB8;
       font-weight: bold;
-      width: auto;
       padding: 10px 50px;
       
-      &:hover {
+      &.wide {
+        padding: 20px 0;
+      }
+      
+      &:hover, &:focus {
         background: rgba(153, 254, 255, 1);
         box-shadow: 0 0 20px #99FEFF;
       }
