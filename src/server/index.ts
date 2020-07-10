@@ -19,6 +19,7 @@ const IS_TEST = process.env.NODE_ENV === "test";
 
 const server: fastify.FastifyInstance = fastify({
   ajv: { customOptions: { schemaId: "auto" } },
+  logger: true,
 });
 
 // └── plugins (from the Fastify ecosystem)
