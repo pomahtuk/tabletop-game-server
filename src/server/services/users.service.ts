@@ -66,7 +66,7 @@ export class UsersService {
       const user = this.repo.create(userInstance);
       return await this.repo.save(user);
     } catch (error) {
-      if (error.code === "SQLITE_CONSTRAINT") {
+      if (error.code === "SQLITE_CONSTRAINT" || error.code === "ER_DUP_ENTRY") {
         throw new HttpException(
           "User with that email or username already exists",
           BAD_REQUEST,
@@ -95,7 +95,7 @@ export class UsersService {
       this.repo.merge(user, userInstance);
       return await this.repo.save(user);
     } catch (error) {
-      if (error.code === "SQLITE_CONSTRAINT") {
+      if (error.code === "SQLITE_CONSTRAINT" || error.code === "ER_DUP_ENTRY") {
         throw new HttpException(
           "User with that email or username already exists",
           BAD_REQUEST,
@@ -118,7 +118,7 @@ export class UsersService {
       await UsersService.validateUserInstance(user);
       return await this.repo.save(user);
     } catch (error) {
-      if (error.code === "SQLITE_CONSTRAINT") {
+      if (error.code === "SQLITE_CONSTRAINT" || error.code === "ER_DUP_ENTRY") {
         throw new HttpException(
           "User with that email or username already exists",
           BAD_REQUEST,

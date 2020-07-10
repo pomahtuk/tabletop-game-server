@@ -48,7 +48,7 @@ export default fp(async (fastify, _opts, next) => {
     url: "/auth/activate/:code",
     logLevel: "warn",
     method: "POST",
-    schema: postUserSchema,
+    // TODO: activation schema here
     handler: async (
       req: FastifyRequest,
       reply: FastifyReply<ServerResponse>
