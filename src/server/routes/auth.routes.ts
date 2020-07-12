@@ -8,6 +8,7 @@ import { UsersService } from "../services/users.service";
 import { AuthService } from "../services/auth.service";
 import { PasswordResetService } from "../services/password.reset.service";
 import { MailerServiceImpl } from "../services/mailer.service";
+import { JWTVerify } from "../authenticators/jwt.authenticator";
 
 export default fp(async (fastify, _opts, next) => {
   const usersService = new UsersService();
@@ -131,5 +132,18 @@ export default fp(async (fastify, _opts, next) => {
     },
   });
 
+  // complete password reset
+  fastify.route({
+    url: "/auth/check",
+    logLevel: "warn",
+    method: "GET",
+    preHandler: fastify.auth([JWTVerify]),
+    handler: async (
+      req: FastifyRequest,
+      reply: FastifyReply<ServerResponse>
+    ) => {
+      return reply.send(req.user);
+    },
+  });
   next();
 });
