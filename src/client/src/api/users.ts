@@ -33,7 +33,8 @@ export const login = (userData: UserData): Promise<UserData> => {
 
 export const logout = (): Promise<void> => {
   return fetch(`${baseHost}/auth/logout`, {
-    ...defaultParams,
+    credentials: "include",
+    method: "POST",
   }).then(responseHandler);
 };
 

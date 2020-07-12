@@ -24,6 +24,7 @@ export default fp(async (fastify, _opts, next) => {
     path: "/",
     // secure: true, // send cookie over HTTPS only
     httpOnly: true,
+    // TODO: find a way to use it in secure way with localhost
     // sameSite: true, // alternative CSRF protection
   };
 

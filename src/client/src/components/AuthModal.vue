@@ -1,24 +1,30 @@
 <template>
-  <modal name="login-modal" :focus-trap="true" :height="'auto'">
-    <div class="login-modal">
+  <modal name="auth-modal" :focus-trap="true" :height="'auto'" @closed="errors = {}">
+    <div class="auth-modal">
       <div class="wrapper">
         <div class="modal-title">
           {{ title }}
         </div>
         <div class="partition-form">
-          <span v-if="userError" class="user-error">
-            {{userError}}
-          </span>
+          <transition name="shake">
+            <span v-if="userError" class="user-error">
+              {{ userError }}
+            </span>
+          </transition>
           
           <form @keypress.enter="handleGo">
             <TextInput label="email" type="email" placeholder="Email" v-model="email" />
             <TextInput v-if="variant === 'register'" label="username" type="text" placeholder="Username" v-model="username" />
             <TextInput v-if="variant !== 'restore'" label="password" type="password" placeholder="Password" v-model="password" />
           </form>
-          
-          <div v-if="Object.keys(errors).length > 0" class="errors">
-            <span />
-          </div>
+
+          <transition name="shake">
+            <ul v-if="Object.keys(errors).length > 0" class="errors">
+              <li v-for="error in Object.values(errors)" :key="error">
+                {{ error }}
+              </li>
+            </ul>
+          </transition>
   
           <div class="button-set">
             <Button glow="true" wide="true" title="GO" @click="handleGo" />
@@ -32,7 +38,7 @@
         </div>
         
         <div class="close-button">
-          <button @click="$modal.hide('login-modal')">
+          <button @click="$modal.hide('auth-modal')">
             <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.5 1L16.5 17" stroke="#F1338B"/>
               <path d="M16.5 1L0.499999 17" stroke="#F1338B"/>
@@ -76,8 +82,8 @@
     private email = "";
 
     @State("userError") userError?: string;
-    @Action(actionTypes.LOGIN_USER) login!: (userData: UserData) => Promise<void>
-    @Action(actionTypes.REGISTER_USER) register!: (userData: UserData) => Promise<void>
+    @Action(actionTypes.LOGIN_USER) login!: (userData: UserData) => Promise<UserData>
+    @Action(actionTypes.REGISTER_USER) register!: (userData: UserData) => Promise<UserData>
     
     setVariant(variant: Variant) {
       this.errors = {};
@@ -89,7 +95,7 @@
       this.errors = {};
       const userData: UserData = {
         username: this.username,
-          email: this.email,
+        email: this.email,
         password: this.password
       }
       const { valid, errors } = validateUser(this.variant, userData);
@@ -98,11 +104,24 @@
         this.errors = errors;
         return;
       }
+      let promise: Promise<UserData> | undefined = undefined;
       switch (this.variant) {
         case "login":
-          return this.login(userData);
+          promise = this.login(userData);
+          break;
         case "register":
-          return this.register(userData);
+          promise = this.register(userData);
+          break
+      }
+      
+      if (promise) {
+        promise.then((data?: UserData) => {
+          if (data) {
+            this.$modal.hide("auth-modal");
+          } else {
+            // shake modal a bit
+          }
+        });
       }
     }
     
@@ -135,7 +154,7 @@
     overflow: visible;
   }
   
-  .login-modal {
+  .auth-modal {
     background: rgba(101, 246, 255, 0.1);
     border: 1px solid $main-color;
     position: relative;
@@ -265,15 +284,52 @@
     }
   }
 
-  .user-error {
+  .user-error, .errors {
     display: block;
     background: rgba(241, 51, 139, 0.2);
     border: 1px solid $accent-color;
     box-sizing: border-box;
     backdrop-filter: blur(5px);
-    padding: 10px 20px;
+    
     margin-bottom: 15px;
-
+    
     color: $accent-color;
+  }
+
+  .user-error {
+    padding: 10px 20px;
+  }
+  
+  .errors {
+     padding: 10px 40px;
+    
+     li {
+       margin-bottom: 5px;
+     }
+  }
+
+  .shake-enter-active {
+    animation: shake .5s;
+  }
+  .shake-leave-active {
+    animation: shake .5s reverse;
+  }
+
+  @keyframes shake {
+    10%, 90% {
+      transform: translate3d(-2px, 0, 0);
+    }
+
+    20%, 80% {
+      transform: translate3d(4px, 0, 0);
+    }
+
+    30%, 50%, 70% {
+      transform: translate3d(-8px, 0, 0);
+    }
+
+    40%, 60% {
+      transform: translate3d(8px, 0, 0);
+    }
   }
 </style>

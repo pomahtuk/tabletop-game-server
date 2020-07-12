@@ -15,7 +15,13 @@
         <Button
           v-if="!user"
           title="Log in"
-          @click="$modal.show('login-modal')"
+          @click="$modal.show('auth-modal')"
+          lines-inverse="true"
+        />
+        <Button
+          v-if="user"
+          :title="logoutText"
+          @click="logoutUser"
           lines-inverse="true"
         />
       </div>
@@ -30,7 +36,7 @@
 
 <script lang="ts">
   import Button from '@/components/Button.vue'
-  import LoginModal from '@/components/LoginModal.vue'
+  import LoginModal from '@/components/AuthModal.vue'
 
   import { Component, Vue } from 'vue-property-decorator';
   import {Action, State} from "vuex-class";
@@ -46,9 +52,14 @@
   export default class App extends Vue {
     @State user?: User;
     @Action(actionTypes.CHECK_USER) checkUser!: () => Promise<void>
+    @Action(actionTypes.LOGOUT_USER) logoutUser!: () => Promise<void>
 
     created() {
       this.checkUser();
+    }
+    
+    get logoutText(): string {
+      return this.user ? `${this.user.username} (log out)` : ""
     }
   }
 </script>

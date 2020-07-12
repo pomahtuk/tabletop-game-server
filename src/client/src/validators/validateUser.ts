@@ -1,5 +1,7 @@
-import { Variant } from "@/components/LoginModal.vue";
+import { Variant } from "@/components/AuthModal.vue";
 import { UserData } from "@/api/users";
+import validator from "validator";
+import isEmail = validator.isEmail;
 
 export type ValidationError = {
   [key in "email" | "username" | "password"]?: string;
@@ -9,11 +11,103 @@ const usernameRegex = new RegExp(/^([a-zA-Z0-9\.\!\@\$\&\~\_])+$/);
 const pwdRegex = new RegExp(
   /^([a-zA-Z0-9\*\.\!\#\@\$\%\^\&\(\)\{\}\[\]\:\;\<\>\,\.\?\/\~\_\+\-\=\|\\])+$/gm
 );
+const passwordMinSize = 6;
+const passwordMaxSize = 255;
+export const passwordSizeMessage = `Password must be between ${passwordMinSize} and ${passwordMaxSize} characters long`;
+
+const usernameMinSize = 4;
+const usernameMaxSize = 255;
+export const usernameSizeMessage = `Username must be between ${usernameMinSize} and ${usernameMaxSize} characters long`;
 
 export interface ValidationResponse {
   valid: boolean;
   errors?: ValidationError;
 }
+
+interface InternalValidation {
+  valid: boolean;
+  error?: string;
+}
+
+const validatePassword = (password?: string): InternalValidation => {
+  if (!password) {
+    return {
+      valid: false,
+      error: passwordSizeMessage,
+    };
+  }
+
+  const sizeValid = validator.isLength(password, {
+    min: passwordMinSize,
+    max: passwordMaxSize,
+  });
+
+  if (!sizeValid) {
+    return {
+      valid: false,
+      error: passwordSizeMessage,
+    };
+  }
+
+  const regexValid = validator.matches(password, pwdRegex);
+
+  console.log(password, regexValid, password.match(pwdRegex));
+
+  if (!regexValid) {
+    return {
+      valid: false,
+      error:
+        "Password can only contain numbers, letters and symbols: * . ! # @ $ % ^ & ( ) [ ] : ; < > , . ?  ~ _ + - = | /",
+    };
+  }
+
+  return {
+    valid: true,
+  };
+};
+
+const validateEmail = (email?: string): InternalValidation => {
+  const emailIsValid = isEmail(email || "");
+  return {
+    valid: emailIsValid,
+    error: emailIsValid ? undefined : "Email must be valid",
+  };
+};
+
+const validateUsername = (username?: string): InternalValidation => {
+  if (!username) {
+    return {
+      valid: false,
+      error: usernameSizeMessage,
+    };
+  }
+
+  const sizeValid = validator.isLength(username, {
+    min: usernameMinSize,
+    max: usernameMaxSize,
+  });
+
+  if (!sizeValid) {
+    return {
+      valid: false,
+      error: usernameSizeMessage,
+    };
+  }
+
+  const regexValid = validator.matches(username || "", usernameRegex);
+
+  if (!regexValid) {
+    return {
+      valid: false,
+      error:
+        "Username can only contain numbers, letters and symbols: . ! @ $ & ~ _",
+    };
+  }
+
+  return {
+    valid: true,
+  };
+};
 
 const validateUserAndAction = (
   action: Variant,
@@ -23,11 +117,12 @@ const validateUserAndAction = (
   let valid = true;
 
   if (action === "restore") {
-    if (!email || email.length < 2) {
+    const { valid: validEmail, error: errorEmail } = validateEmail(email);
+    if (!validEmail) {
       valid = false;
       errors = {
         ...errors,
-        email: "Email should be present",
+        email: errorEmail,
       };
     }
     return {
@@ -37,33 +132,22 @@ const validateUserAndAction = (
   }
 
   // password
-  if (!password || password.length < 6) {
+  const { valid: validPwd, error: errorPwd } = validatePassword(password);
+  if (!validPwd) {
     valid = false;
     errors = {
       ...errors,
-      password: "Password must be present and longer than 5 characters",
-    };
-  } else if (!password.match(pwdRegex)) {
-    valid = false;
-    errors = {
-      ...errors,
-      password:
-        "Can only contain numbers, letters and symbols: * . ! # @ $ % ^ & ( ) [ ] : ; < > , . ?  ~ _ + - = | /",
-    };
-  } else if (password.length > 255) {
-    valid = false;
-    errors = {
-      ...errors,
-      password: "Password can not be longer than 255 characters",
+      password: errorPwd,
     };
   }
 
   if (action === "login") {
-    // email
-    if (!email || email.length < 3) {
+    const { valid: validEmail, error: errorEmail } = validateEmail(email);
+    if (!validEmail) {
+      valid = false;
       errors = {
         ...errors,
-        password: "Email must be present",
+        email: errorEmail,
       };
     }
 
@@ -74,24 +158,14 @@ const validateUserAndAction = (
   }
 
   // username
-  if (!username || username.length < 4) {
+  const { valid: validUsername, error: errorUsername } = validateUsername(
+    username
+  );
+  if (!validUsername) {
     valid = false;
     errors = {
       ...errors,
-      username: "Username must be present",
-    };
-  } else if (!username.match(usernameRegex)) {
-    valid = false;
-    errors = {
-      ...errors,
-      username:
-        "Username can only contain numbers, letters and symbols: . ! @ $ & ~ _",
-    };
-  } else if (username.length > 255) {
-    valid = false;
-    errors = {
-      ...errors,
-      username: "Username can not be longer than 255 characters",
+      username: errorUsername,
     };
   }
 
