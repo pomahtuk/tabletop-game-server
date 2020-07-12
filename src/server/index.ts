@@ -47,7 +47,9 @@ server.register(websocket);
 server.register(fastifyCookie);
 server.register(formBody);
 server.register(auth);
-server.register(cors);
+server.register(cors, {
+  origin: [/\.konquest\.space$/, /localhost/],
+});
 // └── your plugins (your custom plugins)
 // └── decorators
 // └── hooks and middleware

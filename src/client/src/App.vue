@@ -33,8 +33,9 @@
   import LoginModal from '@/components/LoginModal.vue'
 
   import { Component, Vue } from 'vue-property-decorator';
-  import { State } from "vuex-class";
+  import {Action, State} from "vuex-class";
   import { User } from "@/store/state";
+  import {actionTypes} from "@/store/actions";
 
   @Component({
     components: {
@@ -44,6 +45,11 @@
   })
   export default class App extends Vue {
     @State user?: User;
+    @Action(actionTypes.CHECK_USER) checkUser!: () => Promise<void>
+
+    created() {
+      this.checkUser();
+    }
   }
 </script>
 

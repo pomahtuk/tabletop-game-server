@@ -5,7 +5,8 @@ export interface UserData {
 }
 
 const baseHost = "https://api.konquest.space";
-const defaultParams = {
+const defaultParams: RequestInit = {
+  credentials: "include",
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -23,17 +24,29 @@ const responseHandler = async (response: Response) => {
   throw new Error(`Bad server response: ${response.status}`);
 };
 
-export const login = (userData: UserData) => {
-  console.log(userData);
+export const login = (userData: UserData): Promise<UserData> => {
   return fetch(`${baseHost}/auth/login`, {
     ...defaultParams,
     body: JSON.stringify(userData),
   }).then(responseHandler);
 };
 
-export const register = (userData: UserData) => {
+export const logout = (): Promise<void> => {
+  return fetch(`${baseHost}/auth/logout`, {
+    ...defaultParams,
+  }).then(responseHandler);
+};
+
+export const register = (userData: UserData): Promise<UserData> => {
   return fetch(`${baseHost}/auth/register`, {
     ...defaultParams,
     body: JSON.stringify(userData),
+  }).then(responseHandler);
+};
+
+export const checkLogin = (): Promise<UserData> => {
+  return fetch(`${baseHost}/auth/check`, {
+    ...defaultParams,
+    method: "GET",
   }).then(responseHandler);
 };
