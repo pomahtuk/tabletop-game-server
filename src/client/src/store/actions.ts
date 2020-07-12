@@ -11,27 +11,12 @@ export const actionTypes = {
 
 const actions: ActionTree<State, State> = {
   async [actionTypes.CHECK_USER](this, { commit }) {
-    const userString = window.localStorage.getItem("user");
-    let shouldCheckServer = !userString || userString.length === 0;
-
-    if (!shouldCheckServer) {
-      try {
-        return commit(SET_USER, JSON.parse(userString as string));
-      } catch (e) {
-        shouldCheckServer = true;
-      }
+    try {
+      const user = await checkLogin();
+      return commit(SET_USER, user);
+    } catch (e) {
+      // nothing here expected
     }
-
-    if (shouldCheckServer) {
-      try {
-        const user = await checkLogin();
-        return commit(SET_USER, user);
-      } catch (e) {
-        commit(SET_USER, undefined);
-      }
-    }
-
-    commit(SET_USER, undefined);
   },
 
   async [actionTypes.LOGIN_USER](this, { commit }, userData: UserData) {
