@@ -49,6 +49,7 @@ server.register(formBody);
 server.register(auth);
 server.register(cors, {
   origin: [/\.konquest\.space$/, /localhost/],
+  credentials: true,
 });
 // └── your plugins (your custom plugins)
 // └── decorators
