@@ -1,3 +1,9 @@
 export const SET_USER = "SET_USER";
 export const LOADING_USER = "LOADING_USER";
 export const USER_ERROR = "USER_ERROR";
+export const GAMES_ERROR = "GAMES_ERROR";
+export const SET_GAMES = "SET_GAMES";
+export const SET_GAME_SETTINGS = "SET_GAME_SETTINGS";
+export const SET_GAME_FIELD_SETTINGS = "SET_GAME_FIELD_SETTINGS";
+export const SET_GAME_PLAYERS = "SET_GAME_PLAYERS";
+export const SET_GAME_NUM_PLAYERS = "SET_GAME_NUM_PLAYERS";

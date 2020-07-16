@@ -1,5 +1,5 @@
 <template>
-  <div class="game-list">
+  <LinesContainer class-name="game-list">
     <div class="wrapper">
       <table>
         <thead>
@@ -25,135 +25,102 @@
         </tr>
         </tbody>
       </table>
+      <div v-if="!gamesError && (!games || games.length === 0)" class="no-games">
+        <!--    TODO: add refresh button    -->
+        <span>No games found</span>
+        <Button @click="$emit('refresh');" title="Refresh"/>
+      </div>
+      <div v-if="gamesError" class="games-error">
+        {{ gamesError }}
+      </div>
     </div>
-
-    <div class="left-top-line" />
-    <div class="left-line" />
-    <div class="right-bottom-line" />
-    <div class="bottom-line" />
-  </div>
+  </LinesContainer>
 </template>
 
 <script lang="ts">
-  import { Component, Prop, Vue } from 'vue-property-decorator';
+  import { Component, Vue } from 'vue-property-decorator';
   import Button from "@/components/Button.vue";
-
-  export interface GameItem {
-    created: string;
-    name: string;
-    players: string;
-    fieldSize: string;
-    neutralPlanets: number;
-  }
+  import {GameItem} from "@/store/state";
+  import {State} from "vuex-class";
+  import LinesContainer from "@/components/LinesContainer.vue";
   
   @Component({
     components: {
-      Button
+      Button,
+      LinesContainer
     }
   })
   export default class GameTable extends Vue {
-    @Prop() private games!: GameItem[];
+    @State("games") games!: GameItem[];
+    @State("gamesError") gamesError?: string;
   }
+  
+  // TODO: add refresh button pagination
 </script>
 
 <style scoped lang="scss">
-  $main-color: #65F6FF;
-  $main-transparent: rgba(101, 246, 255, 0.1);
-  
-  $scrollbarBG: transparent;
-  $thumbBG: #3A7BDB;
+  @import "src/styles/base";
   
   .game-list {
-    margin: 5vh auto 0 auto;
-    width: 80vw;
-    border: 1px solid $main-color;
-    background: $main-transparent;
-    padding: 20px;
-    position: relative;
-    top: 0;
-    left: 0;
-    
-    .wrapper {
-      max-height: calc(80vh - 100px);
-      overflow: auto;
-      scrollbar-width: thin;
-      scrollbar-color: $thumbBG $main-color;
+    padding: $spacing-main;
+  }
 
-      &::-webkit-scrollbar {
-        width: 3px;
-      }
-      &::-webkit-scrollbar-track {
-        background: $main-color;
-        width: 1px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background-color: $thumbBG;
-        border-radius: 6px;
-        border: 2px solid $thumbBG;
-      }
-
-    }
-
-    &:after {
-      z-index: 1;
+  .no-games,
+  .games-error {
+    display: inline-block;
+    margin: $spacing-main auto;
+  }
+  
+  .no-games {
+    span {
       display: block;
-      content: "";
-      position: absolute;
-      bottom: -1px;
-      left: 30%;
-      width: 40%;
-      height: 1px;
-      border-radius: 5px;
-      filter: blur(1px);
-      background: rgb(101,246,255);
-      background: linear-gradient(90deg, rgba(101,246,255,1) 0%, rgba(255,255,255,1) 30%, rgba(255,255,255,1) 70%, rgba(101,246,255,1) 100%);
-      box-shadow: 0 0 5px $main-color;
+      text-align: center;
+      margin-bottom: $spacing-main;
+    }
+  }
+  
+  .games-error {
+    padding: 10px 20px;
+    
+    background: rgba($accent-color, 0.2);
+    border: 1px solid $accent-color;
+    box-sizing: border-box;
+    backdrop-filter: blur(5px);
+
+    color: $accent-color;
+  }
+
+  .left-top-line {
+    min-width: 40px;
+    min-height: 145px;
+  }
+  
+  .right-bottom-line {
+    min-width: 180px;
+    min-height: 180px;
+  }
+  
+  .wrapper {
+    max-height: calc(80vh - 100px);
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: $thumbBG $main-color;
+
+    &::-webkit-scrollbar {
+      width: 3px;
+    }
+    &::-webkit-scrollbar-track {
+      background: $main-color;
+      width: 1px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: $thumbBG;
+      border-radius: 6px;
+      border: 2px solid $thumbBG;
     }
 
-  }
-  
-  .left-line,
-  .left-top-line,
-  .bottom-line,
-  .right-bottom-line {
-    position: absolute;
-    z-index: 1;
-  }
-
-  .left-line,
-  .left-top-line {
-    left: 3px;
-    border-left: 1px solid $main-color;
-  }
-  
-  .left-top-line {
-    top: 3px;
-    width: 40px;
-    height: 145px;
-    border-top: 1px solid $main-color;
-  }
-  
-  .left-line {
-    top: 163px;
-    height: 48px;
-  }
-  
-  .right-bottom-line,
-  .bottom-line {
-    bottom: 3px;
-    border-bottom: 1px solid $main-color;
-  }
-  
-  .bottom-line {
-    right: 193px;
-    width: 90px;
-  }
-  
-  .right-bottom-line {
-    right: 3px;
-    width: 180px;
-    height: 180px;
-    border-right: 1px solid $main-color;
   }
   
   table {
@@ -164,7 +131,7 @@
     left: 0;
     top: 0;
     z-index: 2;
-    padding-bottom: 5px;
+    padding-bottom: $spacing-smallest;
     
     tr, td {
       border: none;
@@ -177,17 +144,17 @@
     }
 
     td:first-child {
-      padding-left: 10px;
+      padding-left: $spacing-small;
     }
 
     td:last-child {
-      padding-right: 10px;
+      padding-right: $spacing-small;
     }
     
     tbody {
       tr {
         td > span {
-          padding: 10px 0;
+          padding: $spacing-small 0;
         }
         
         &.blank {
@@ -208,7 +175,7 @@
         }
         
         td.button {
-          padding: 5px 0;
+          padding: $spacing-smallest 0;
           width: 180px;
           
           & > * {
@@ -225,7 +192,7 @@
       color: #177278;
 
       td {
-        padding-bottom: 20px;
+        padding-bottom: $spacing-main;
       }
     }
   }

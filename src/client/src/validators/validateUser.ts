@@ -1,5 +1,5 @@
 import { Variant } from "@/components/AuthModal.vue";
-import { UserData } from "@/api/users";
+import { UserData } from "@/api/clinet";
 import validator from "validator";
 import isEmail = validator.isEmail;
 

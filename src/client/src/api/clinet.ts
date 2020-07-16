@@ -1,3 +1,5 @@
+import { GameItem } from "@/store/state";
+
 export interface UserData {
   username?: string;
   password?: string;
@@ -24,21 +26,21 @@ const responseHandler = async (response: Response) => {
   throw new Error(`Bad server response: ${response.status}`);
 };
 
-export const login = (userData: UserData): Promise<UserData> => {
+export const loginUser = (userData: UserData): Promise<UserData> => {
   return fetch(`${baseHost}/auth/login`, {
     ...defaultParams,
     body: JSON.stringify(userData),
   }).then(responseHandler);
 };
 
-export const logout = (): Promise<void> => {
+export const logoutUser = (): Promise<void> => {
   return fetch(`${baseHost}/auth/logout`, {
     credentials: "include",
     method: "POST",
   }).then(responseHandler);
 };
 
-export const register = (userData: UserData): Promise<UserData> => {
+export const registerUser = (userData: UserData): Promise<UserData> => {
   return fetch(`${baseHost}/auth/register`, {
     ...defaultParams,
     body: JSON.stringify(userData),
@@ -47,6 +49,13 @@ export const register = (userData: UserData): Promise<UserData> => {
 
 export const checkLogin = (): Promise<UserData> => {
   return fetch(`${baseHost}/auth/check`, {
+    ...defaultParams,
+    method: "GET",
+  }).then(responseHandler);
+};
+
+export const getGames = (): Promise<GameItem> => {
+  return fetch(`${baseHost}/games`, {
     ...defaultParams,
     method: "GET",
   }).then(responseHandler);

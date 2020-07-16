@@ -1,0 +1,24 @@
+@import "src/styles/colors";
+@import "src/styles/sizes";
+
+.k-container {
+  position: relative;
+  top: 0;
+  left: 0;
+  padding: $spacing-main;
+
+  &:after {
+    z-index: 1;
+    display: block;
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 30%;
+    width: 40%;
+    height: 1px;
+    border-radius: 5px;
+    filter: blur(1px);
+    background: linear-gradient(90deg, rgba($glow-color, 1) 0%, rgba(255,255,255, 1) 30%, rgba(255,255,255, 1) 70%, rgba($glow-color, 1) 100%);
+    box-shadow: 0 0 5px $main-color;
+  }
+}

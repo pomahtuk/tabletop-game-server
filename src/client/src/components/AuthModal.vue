@@ -1,6 +1,6 @@
 <template>
   <modal name="auth-modal" :focus-trap="true" :height="'auto'" @closed="errors = {}">
-    <div class="auth-modal">
+    <div class="auth-modal k-container">
       <div class="wrapper">
         <div class="modal-title">
           {{ title }}
@@ -63,7 +63,7 @@
   import TextInput from "@/components/TextInput.vue";
   import {actionTypes} from "@/store/actions";
   import validateUser, { ValidationError } from "@/validators/validateUser";
-  import {UserData} from "@/api/users";
+  import {UserData} from "@/api/clinet";
   
   export type Variant = "login" | "register" | "restore";
   
@@ -139,8 +139,7 @@
 </script>
 
 <style lang="scss">
-  $main-color: #65F6FF;
-  $accent-color: #F1338B;
+  @import "src/styles/base";
   
   .vm--overlay {
     background: rgba(18, 16, 45, 0.8);
@@ -154,35 +153,17 @@
     overflow: visible;
   }
   
-  .auth-modal {
+  div.auth-modal {
     background: rgba(101, 246, 255, 0.1);
     border: 1px solid $main-color;
-    position: relative;
-    top: 0;
-    left: 0;
+    padding: 0;
     
     .wrapper {
-      padding: 20px 60px;
+      padding: $spacing-main $spacing-huge;
       position: relative;
       top: 0;
       left: 0;
       z-index: 2;
-    }
-
-    &:after {
-      z-index: 1;
-      display: block;
-      content: "";
-      position: absolute;
-      bottom: -1px;
-      left: 32%;
-      width: 36%;
-      height: 1px;
-      border-radius: 5px;
-      filter: blur(1px);
-      background: rgb(101,246,255);
-      background: linear-gradient(90deg, rgba(101,246,255,1) 0%, rgba(255,255,255,1) 30%, rgba(255,255,255,1) 70%, rgba(101,246,255,1) 100%);
-      box-shadow: 0 0 5px $main-color;
     }
     
     .modal-title {
@@ -190,7 +171,7 @@
       font-size: 24px;
       line-height: 29px;
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: $spacing-main;
     }
     
     .top-right-line, 
@@ -257,7 +238,7 @@
   }
 
   .link-switches {
-    padding: 40px 0 30px 0;
+    padding: $spacing-big 0 $spacing-main 0;
     text-align: center;
     display: flex;
     justify-content: space-evenly;
@@ -286,25 +267,25 @@
 
   .user-error, .errors {
     display: block;
-    background: rgba(241, 51, 139, 0.2);
+    background: rgba($accent-color, 0.2);
     border: 1px solid $accent-color;
     box-sizing: border-box;
     backdrop-filter: blur(5px);
     
-    margin-bottom: 15px;
+    margin-bottom: $spacing-main;
     
     color: $accent-color;
   }
 
   .user-error {
-    padding: 10px 20px;
+    padding: $spacing-small $spacing-main;
   }
   
   .errors {
-     padding: 10px 40px;
+     padding: $spacing-small $spacing-big;
     
      li {
-       margin-bottom: 5px;
+       margin-bottom: $spacing-smallest;
      }
   }
 

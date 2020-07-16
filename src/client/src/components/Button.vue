@@ -3,7 +3,12 @@
     @click="handleClick" 
     v-bind:class="{'primary': primary, 'lines-inverse': linesInverse, 'glow': glow, 'wide': wide}"
   >
+    <span v-if="avatarUrl" class="avatar">
+      <img :src="avatarUrl" alt="user-avatar" />
+    </span>
+    
     {{ title }}
+    
     <div class="line top-line" />
     <div class="line bottom-line" />
     <div class="line side-bottom-line"/>
@@ -21,16 +26,17 @@
     @Prop() private linesInverse!: boolean;
     @Prop() private glow!: boolean;
     @Prop() private wide!: boolean;
+    @Prop() private avatarUrl?: string;
 
-    handleClick() {
+    handleClick(e: Event) {
+      e.preventDefault();
       this.$emit('click');
     }
   }
 </script>
 
 <style scoped lang="scss">
-  $accent-color: #F1338B;
-  $main-color: #65F6FF;
+  @import "src/styles/base";
 
   button {
     font-family: inherit;
@@ -39,10 +45,10 @@
     font-weight: normal;
     font-size: 16px;
     line-height: 19px;
-    background: rgba(101, 246, 255, 0.1);
+    background: $main-transparent;
     border: 1px solid $main-color;
     box-sizing: border-box;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 4px rgba(black, 0.25);
     backdrop-filter: blur(4px);
     text-align: center;
     margin: 0 1px;
@@ -51,8 +57,9 @@
     position: relative;
     top: 0;
     left: 0;
-    width: 150px;
-    padding: 12px 0;
+    min-width: 150px;
+    padding: 12px $spacing-main;
+    vertical-align: middle;
     
     &.wide {
       width: 100%;
@@ -60,8 +67,8 @@
     
     &:hover,
     &:focus {
-      background: rgba(101, 246, 255, 0.3);
-      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
+      background: rgba($main-color, 0.3);
+      box-shadow: 0 4px 4px rgba(black, 0.5);
     }
     
     .top-line,
@@ -137,11 +144,11 @@
     
     &.primary {
       color: $accent-color;
-      background: rgba(241, 51, 139, 0.2);
+      background: rgba($accent-color, 0.2);
       border: 1px solid $accent-color;
       
       &:hover {
-        background: rgba(241, 51, 139, 0.4);
+        background: rgba($accent-color, 0.4);
       }
       
       .top-line {
@@ -169,21 +176,21 @@
     }
     
     &.glow {
-      background: rgba(153, 254, 255, 0.9);
+      background: rgba($glow-color, 0.9);
       border: 1px solid #00F0FF;
       box-sizing: border-box;
-      box-shadow: 0 0 5px #99FEFF;
+      box-shadow: 0 0 5px $glow-color;
       color: #09AEB8;
       font-weight: bold;
-      padding: 10px 50px;
+      padding: $spacing-small $spacing-biggest;
       
       &.wide {
-        padding: 20px 0;
+        padding: $spacing-main 0;
       }
       
       &:hover, &:focus {
-        background: rgba(153, 254, 255, 1);
-        box-shadow: 0 0 20px #99FEFF;
+        background: rgba($glow-color, 1);
+        box-shadow: 0 0 $spacing-main $glow-color;
       }
       
       .line {
@@ -193,8 +200,21 @@
 
     @media (min-width: 320px) and (max-width: 480px) {
       &.glow {
-        padding: 5px 20px;
+        padding: $spacing-smallest $spacing-main;
       }
+    }
+  }
+  
+  .avatar {
+    border-radius: 50%;
+    height: 25px;
+    margin: -8px 5px -5px 0;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: middle;
+    
+    img {
+      height: 100%;
     }
   }
 </style>

@@ -21,9 +21,11 @@
 </script>
 
 <style scoped lang="scss">
+  @import "src/styles/base";
+  
   .input-wrapper {
-    border: 1px solid #65F6FF;
-    margin-bottom: 10px;
+    border: 1px solid $main-color;
+    margin-bottom: $spacing-small;
     
     input {
       font-family: "Exo 2", sans-serif;
@@ -34,18 +36,18 @@
       border: none;
       outline: none;
       box-sizing: border-box;
-      padding: 20px;
+      padding: $spacing-main;
       /*font-weight: 600;*/
-      color: #65F6FF;
+      color: $main-color;
     }
 
     input:focus {
-      box-shadow: 0 0 10px #99FEFF;
+      box-shadow: 0 0 $spacing-small $glow-color;
     }
 
     input::placeholder {
       font-weight: 300;
-      color: rgba(101, 246, 255, 0.5);
+      color: rgba($main-color, 0.5);
     }
   }
 </style>
