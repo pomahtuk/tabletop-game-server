@@ -70,7 +70,19 @@ const state: State = {
   },
   gamePlayerSettings: {
     numPlayers: 2,
-    initialPlayers: [],
+    initialPlayers: [
+      {
+        id: "0",
+        username: "test",
+        isComputer: false,
+      },
+      {
+        id: "1",
+        username: "Bot 1",
+        isComputer: true,
+        computerPlayerType: ComputerPlayerType.NORMAL,
+      },
+    ],
   },
 };
 

@@ -1,39 +1,38 @@
 <template>
-  <div id="app">
-    <div class="backdrop-before"></div>
-    <div id="nav">
-      <a href="/" @click="handleLogoClick" class="logo">
-        <span class="logo-accent">Konquest.</span>
-        space
-      </a>
-      <div class="nav-links">
-        <Button
-          v-if="user"
-          title="Start game"
-          primary="true"
-          @click="$router.push({name: 'Create Game'})"
-        />
-        <Button
-          v-if="!user"
-          title="Log in"
-          @click="$modal.show('auth-modal')"
-          lines-inverse="true"
-        />
-        <Button
-          v-if="user"
-          :avatar-url="userAvatar"
-          :title="logoutText"
-          @click="logoutUser"
-          lines-inverse="true"
-        />
+  <v-app>
+    <div id="app">
+      <div class="backdrop-before"></div>
+      <div id="nav">
+        <a href="/" @click="handleLogoClick" class="logo">
+          <span class="logo-accent">Konquest.</span>
+          space
+        </a>
+        <div class="nav-links">
+          <Button
+            v-if="user"
+            primary="true"
+            @click="$router.push({name: 'Create Game'})"
+          >Start game</Button>
+          <Button
+            v-if="!user"
+            @click="$modal.show('auth-modal')"
+            lines-inverse="true"
+          >Log in</Button>
+          <Button
+            v-if="user"
+            :avatar-url="userAvatar"
+            @click="logoutUser"
+            lines-inverse="true"
+          >{{ logoutText }}</Button>
+        </div>
       </div>
+      <router-view />
+      <div class="backdrop-after"></div>
+  
+      <LoginModal />
+      
     </div>
-    <router-view />
-    <div class="backdrop-after"></div>
-
-    <LoginModal />
-    
-  </div>
+  </v-app>
 </template>
 
 <script lang="ts">
@@ -101,6 +100,7 @@
     position: relative;
     top: 0;
     left: 0;
+    background: none;
   
     .backdrop-before,
     .backdrop-after {
@@ -111,7 +111,7 @@
       z-index: 1;
     }
   
-   .backdrop-before {
+    .backdrop-before {
       width: 45vh;
       height: 45vh;
       left: -14vh;
@@ -128,7 +128,7 @@
       background: rgba(101, 218, 255, 0.1);
       filter: blur(40vh);
     }
-  
+    
   }
   
   #nav {
@@ -152,5 +152,10 @@
         color: $accent-color;
       }
     }
+  }
+
+  /*override vuetify*/
+  .v-application a {
+    color: inherit;
   }
 </style>

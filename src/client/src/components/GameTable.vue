@@ -19,7 +19,7 @@
           <td class="player"><span>{{game.players}}</span></td>
           <td class="field-size"><span>{{game.fieldSize}}</span></td>
           <td class="neutral-planets"><span>{{game.neutralPlanets}}</span></td>
-          <td class="button"><Button title="Join" glow="true" /></td>
+          <td class="button"><Button glow="true">Join</Button></td>
         </tr>
         <tr class="blank">
         </tr>
@@ -28,7 +28,7 @@
       <div v-if="!gamesError && (!games || games.length === 0)" class="no-games">
         <!--    TODO: add refresh button    -->
         <span>No games found</span>
-        <Button @click="$emit('refresh');" title="Refresh"/>
+        <Button @click="$emit('refresh');">Refresh</Button>
       </div>
       <div v-if="gamesError" class="games-error">
         {{ gamesError }}

@@ -1,6 +1,7 @@
 import {
   GAMES_ERROR,
   LOADING_USER,
+  SET_GAME_FIELD_SETTINGS,
   SET_GAME_NUM_PLAYERS,
   SET_GAME_PLAYERS,
   SET_GAME_SETTINGS,
@@ -17,14 +18,9 @@ import {
   UserData,
 } from "@/api/clinet";
 import { ActionTree } from "vuex";
-import {
-  ComputerPlayerType,
-  GameFieldSettings,
-  GameSettings,
-  Player,
-  State,
-} from "@/store/state";
+import { ComputerPlayerType, GameSettings, Player, State } from "@/store/state";
 import { v4 as uuid } from "uuid";
+import getPlanetLimit from "../../../server/gamelogic/helpers/getPlanetLimit";
 
 export const actionTypes = {
   CHECK_USER: "CHECK_USER",
@@ -33,7 +29,9 @@ export const actionTypes = {
   LOGOUT_USER: "LOGOUT_USER",
   GET_GAMES: "GET_GAMES",
   SET_GAME_SETTINGS: "SET_GAME_SETTINGS",
-  SET_GAME_FIELD_SETTINGS: "SET_GAME_FIELD_SETTINGS",
+  SET_GAME_FIELD_HEIGHT: "SET_GAME_FIELD_HEIGHT",
+  SET_GAME_FIELD_WIDTH: "SET_GAME_FIELD_WIDTH",
+  SET_GAME_NEUTRAL_PLANETS_COUNT: "SET_GAME_NEUTRAL_PLANETS_COUNT",
   ADD_COMPUTER_PLAYER: "ADD_COMPUTER_PLAYER",
   ADD_PLAYER: "ADD_PLAYER",
   REMOVE_PLAYER: "REMOVE_PLAYER",
@@ -87,12 +85,45 @@ const actions: ActionTree<State, State> = {
     return commit(SET_GAME_SETTINGS, settings);
   },
 
-  [actionTypes.SET_GAME_FIELD_SETTINGS](
+  [actionTypes.SET_GAME_FIELD_WIDTH](this, { commit, state }, width: number) {
+    const { neutralPlanets } = state.gameFieldSettings;
+    const fieldSize = state.gameFieldSettings.fieldHeight * width;
+    const maxPlanets = getPlanetLimit(
+      fieldSize,
+      state.gamePlayerSettings.numPlayers
+    );
+    return commit(SET_GAME_FIELD_SETTINGS, {
+      ...state.gameFieldSettings,
+      filedWidth: width,
+      neutralPlanets:
+        neutralPlanets <= maxPlanets ? neutralPlanets : maxPlanets,
+    });
+  },
+
+  [actionTypes.SET_GAME_FIELD_HEIGHT](this, { commit, state }, height: number) {
+    const { neutralPlanets } = state.gameFieldSettings;
+    const fieldSize = state.gameFieldSettings.filedWidth * height;
+    const maxPlanets = getPlanetLimit(
+      fieldSize,
+      state.gamePlayerSettings.numPlayers
+    );
+    return commit(SET_GAME_FIELD_SETTINGS, {
+      ...state.gameFieldSettings,
+      fieldHeight: height,
+      neutralPlanets:
+        neutralPlanets <= maxPlanets ? neutralPlanets : maxPlanets,
+    });
+  },
+
+  [actionTypes.SET_GAME_NEUTRAL_PLANETS_COUNT](
     this,
-    { commit },
-    settings: GameFieldSettings
+    { commit, state },
+    neutralPlanets: number
   ) {
-    return commit(SET_GAME_SETTINGS, settings);
+    return commit(SET_GAME_FIELD_SETTINGS, {
+      ...state.gameFieldSettings,
+      neutralPlanets,
+    });
   },
 
   async [actionTypes.CHECK_USER](this, { commit }) {

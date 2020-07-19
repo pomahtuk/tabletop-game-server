@@ -1,13 +1,13 @@
 <template>
   <button 
     @click="handleClick" 
-    v-bind:class="{'primary': primary, 'lines-inverse': linesInverse, 'glow': glow, 'wide': wide}"
+    v-bind:class="{'primary-button': primary, 'lines-inverse': linesInverse, 'glow': glow, 'wide': wide, 'skinny': skinny}"
   >
     <span v-if="avatarUrl" class="avatar">
       <img :src="avatarUrl" alt="user-avatar" />
     </span>
-    
-    {{ title }}
+
+    <slot></slot>
     
     <div class="line top-line" />
     <div class="line bottom-line" />
@@ -21,12 +21,12 @@
 
   @Component
   export default class Button extends Vue {
-    @Prop() private title!: string;
     @Prop() private primary!: boolean;
     @Prop() private linesInverse!: boolean;
     @Prop() private glow!: boolean;
     @Prop() private wide!: boolean;
     @Prop() private avatarUrl?: string;
+    @Prop() private skinny?: boolean;
 
     handleClick(e: Event) {
       e.preventDefault();
@@ -63,6 +63,16 @@
     
     &.wide {
       width: 100%;
+    }
+    
+    &.skinny {
+      min-width: 0;
+      padding: 10px;
+      line-height: 10px;
+      
+      .line {
+        display: none;
+      }
     }
     
     &:hover,
@@ -142,7 +152,7 @@
       }
     }
     
-    &.primary {
+    &.primary-button {
       color: $accent-color;
       background: rgba($accent-color, 0.2);
       border: 1px solid $accent-color;

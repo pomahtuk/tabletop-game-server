@@ -27,13 +27,13 @@
           </transition>
   
           <div class="button-set">
-            <Button glow="true" wide="true" title="GO" @click="handleGo" />
+            <Button glow="true" wide="true" @click="handleGo">GO</Button>
           </div>
           
           <div class="link-switches">
-            <a class="forgot-password" @click="setVariant('restore')">Forgot password</a>
-            <a class="register" @click="setVariant('register')" v-if="variant === 'login'">Registration</a>
-            <a class="login" @click="setVariant('login')" v-if="variant !== 'login'">Log in</a>
+            <a class="link forgot-password" @click="setVariant('restore')">Forgot password</a>
+            <a class="link register" @click="setVariant('register')" v-if="variant === 'login'">Registration</a>
+            <a class="link login" @click="setVariant('login')" v-if="variant !== 'login'">Log in</a>
           </div>
         </div>
         
@@ -243,11 +243,12 @@
     display: flex;
     justify-content: space-evenly;
     
-    a {
+    a.link {
       display: inline-block;
       padding-bottom: 5px;
       cursor: pointer;
       border-bottom: 1px solid transparent;
+      color: inherit;
 
       &:hover,
       &:active {

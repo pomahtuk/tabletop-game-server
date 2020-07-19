@@ -1,11 +1,12 @@
 <template>
   <div class="create-game">
     <div class="left-column column">
+      <GamePlayerOptions />
+    </div>
+    
+    <div class="right-column column">
       <GameOptions />
       <GameFieldOptions />
-    </div>
-    <div class="right-column column">
-      <GamePlayerOptions />
     </div>
   </div>
 </template>
@@ -54,16 +55,16 @@
       box-sizing: border-box;
     }
     
-    .left-column {
-      padding-right: 10px;
+    .right-column  {
+      padding-left: 10px;
       
       .panel:first-child {
         margin-bottom: 20px;
       }
     }
     
-    .right-column {
-      padding-left: 10px;
+    .left-column {
+      padding-right: 10px;
       
       .panel {
         height: 100%;
