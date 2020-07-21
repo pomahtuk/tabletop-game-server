@@ -39,10 +39,10 @@
 
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
-  import Button from "@/components/Button.vue";
+  import Button from "@/components/base/Button.vue";
   import {GameItem} from "@/store/state";
   import {State} from "vuex-class";
-  import LinesContainer from "@/components/LinesContainer.vue";
+  import LinesContainer from "@/components/base/LinesContainer.vue";
   
   @Component({
     components: {

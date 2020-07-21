@@ -2,7 +2,6 @@ import {
   GAMES_ERROR,
   LOADING_USER,
   SET_GAME_FIELD_SETTINGS,
-  SET_GAME_NUM_PLAYERS,
   SET_GAME_PLAYERS,
   SET_GAME_SETTINGS,
   SET_GAMES,
@@ -19,35 +18,32 @@ import {
 } from "@/store/state";
 
 export default {
-  [LOADING_USER](state: State) {
+  [LOADING_USER](state: State): void {
     state.loadingUser = true;
     state.userError = undefined;
   },
-  [USER_ERROR](state: State, error: string) {
+  [USER_ERROR](state: State, error: string): void {
     state.loadingUser = false;
     state.userError = error;
   },
-  [SET_USER](state: State, user: User) {
+  [SET_USER](state: State, user: User): void {
     state.loadingUser = false;
     state.user = user;
   },
-  [SET_GAMES](state: State, games: GameItem[]) {
+  [SET_GAMES](state: State, games: GameItem[]): void {
     state.gamesError = undefined;
     state.games = games;
   },
-  [GAMES_ERROR](state: State, error: string) {
+  [GAMES_ERROR](state: State, error: string): void {
     state.gamesError = error;
   },
-  [SET_GAME_SETTINGS](state: State, settings: GameSettings) {
+  [SET_GAME_SETTINGS](state: State, settings: GameSettings): void {
     state.gameSettings = settings;
   },
-  [SET_GAME_FIELD_SETTINGS](state: State, settings: GameFieldSettings) {
+  [SET_GAME_FIELD_SETTINGS](state: State, settings: GameFieldSettings): void {
     state.gameFieldSettings = settings;
   },
-  [SET_GAME_PLAYERS](state: State, players: Player[]) {
+  [SET_GAME_PLAYERS](state: State, players: Player[]): void {
     state.gamePlayerSettings.initialPlayers = players;
-  },
-  [SET_GAME_NUM_PLAYERS](state: State, number: number) {
-    state.gamePlayerSettings.numPlayers = number;
   },
 };

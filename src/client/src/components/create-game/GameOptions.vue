@@ -1,28 +1,30 @@
 <template>
   <LinesContainer class-name="game-settings panel k-container">
     <h1>options</h1>
-    {{gameSettings.name}}
-    <br/>
+    <TextInput :value="gameSettings.name" @input="setGameName" type="text" placeholder="game name" />
+    <!--  switch for pwd  -->
     {{gameSettings.password || "none"}}
   </LinesContainer>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import LinesContainer from "./LinesContainer.vue";
+  import LinesContainer from "../base/LinesContainer.vue";
   import {Action, State} from "vuex-class";
   import { GameSettings} from "@/store/state";
   import {actionTypes} from "@/store/actions";
+  import TextInput from "@/components/base/TextInput.vue";
 
   @Component({
     components: {
-      LinesContainer
+      LinesContainer,
+      TextInput
     }
   })
   export default class GameOptions extends Vue {
     @State("gameSettings") gameSettings!: GameSettings;
 
-    @Action(actionTypes.SET_GAME_SETTINGS) setGameSettings!: () => void
+    @Action(actionTypes.SET_GAME_NAME) setGameName!: (name: string) => void
   }
 </script>
 

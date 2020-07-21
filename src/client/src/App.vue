@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-  import Button from '@/components/Button.vue'
+  import Button from '@/components/base/Button.vue'
   import LoginModal from '@/components/AuthModal.vue'
 
   import { Component, Vue } from 'vue-property-decorator';
@@ -56,11 +56,11 @@
     @Action(actionTypes.CHECK_USER) checkUser!: () => Promise<void>
     @Action(actionTypes.LOGOUT_USER) logoutUser!: () => Promise<void>
 
-    created() {
+    created(): void {
       this.checkUser();
     }
     
-    handleLogoClick(e: Event) {
+    handleLogoClick(e: Event): void {
       e.preventDefault();
       this.$router.push({name: 'Home'})
     }

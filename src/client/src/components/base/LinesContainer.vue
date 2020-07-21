@@ -33,6 +33,7 @@
 
     & > * {
       z-index: 2;
+      position: relative;
     }
 
     & > div {

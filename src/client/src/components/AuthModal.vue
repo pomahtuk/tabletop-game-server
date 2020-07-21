@@ -59,8 +59,8 @@
   import {Action, State} from "vuex-class";
 
   import { Component, Vue } from 'vue-property-decorator';
-  import Button from "@/components/Button.vue";
-  import TextInput from "@/components/TextInput.vue";
+  import Button from "@/components/base/Button.vue";
+  import TextInput from "@/components/base/TextInput.vue";
   import {actionTypes} from "@/store/actions";
   import validateUser, { ValidationError } from "@/validators/validateUser";
   import {UserData} from "@/api/clinet";
@@ -85,12 +85,12 @@
     @Action(actionTypes.LOGIN_USER) login!: (userData: UserData) => Promise<UserData>
     @Action(actionTypes.REGISTER_USER) register!: (userData: UserData) => Promise<UserData>
     
-    setVariant(variant: Variant) {
+    setVariant(variant: Variant): void {
       this.errors = {};
       this.variant = variant;
     }
 
-    handleGo() {
+    handleGo(): void {
       // validate
       this.errors = {};
       const userData: UserData = {

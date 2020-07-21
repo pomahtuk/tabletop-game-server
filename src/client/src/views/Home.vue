@@ -30,11 +30,11 @@ export default class Home extends Vue {
   
   private gamesPromise: Promise<GameItem[]> | undefined;
   
-  refreshList() {
+  refreshList(): void {
     this.gamesPromise = this.loadGames();
   }
   
-  created() {
+  created(): void {
     this.refreshList();
   }
 }

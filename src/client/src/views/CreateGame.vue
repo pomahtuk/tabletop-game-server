@@ -13,12 +13,12 @@
 
 <script lang="ts">
   import { Component, Prop, Vue } from 'vue-property-decorator';
-  import LinesContainer from "../components/LinesContainer.vue";
-  import GameOptions from "@/components/GameOptions.vue";
+  import LinesContainer from "../components/base/LinesContainer.vue";
+  import GameOptions from "@/components/create-game/GameOptions.vue";
   import {State} from "vuex-class";
   import {GameFieldSettings, GamePlayerSettings, GameSettings} from "@/store/state";
-  import GameFieldOptions from "@/components/GameFieldOptions.vue";
-  import GamePlayerOptions from "@/components/GamePlayerOptions.vue";
+  import GameFieldOptions from "@/components/create-game/GameFieldOptions.vue";
+  import GamePlayerOptions from "@/components/create-game/GamePlayerOptions.vue";
   
   @Component({
     components: {

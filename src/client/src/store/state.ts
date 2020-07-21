@@ -7,6 +7,7 @@ export interface GameItem {
 }
 
 export interface User {
+  id: string;
   username: string;
   email: string;
 }
@@ -37,7 +38,6 @@ export interface Player {
 }
 
 export interface GamePlayerSettings {
-  numPlayers: number;
   initialPlayers: Player[];
 }
 
@@ -69,20 +69,7 @@ const state: State = {
     neutralPlanets: 2,
   },
   gamePlayerSettings: {
-    numPlayers: 2,
-    initialPlayers: [
-      {
-        id: "0",
-        username: "test",
-        isComputer: false,
-      },
-      {
-        id: "1",
-        username: "Bot 1",
-        isComputer: true,
-        computerPlayerType: ComputerPlayerType.NORMAL,
-      },
-    ],
+    initialPlayers: [],
   },
 };
 

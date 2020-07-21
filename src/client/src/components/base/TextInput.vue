@@ -1,6 +1,6 @@
 <template>
   <div class="input-wrapper">
-    <input :aria-label="label" :placeholder="placeholder" :type="type" @input="handleInput" />
+    <input :value="value" :aria-label="label" :placeholder="placeholder" :type="type" @input="handleInput" @change="handleChange" />
   </div>
 </template>
 
@@ -13,9 +13,17 @@
     @Prop() private label!: string;
     @Prop() private placeholder!: string;
     @Prop() private type!: "text" | "number" | "password";
+    
+    created(): void {
+      console.log(this.value)
+    }
 
-    handleInput(e: InputEvent) {
+    handleInput(e: InputEvent): void {
       this.$emit('input', (e.target as HTMLInputElement).value)
+    }
+
+    handleChange(e: InputEvent): void {
+      this.$emit('change', (e.target as HTMLInputElement).value)
     }
   }
 </script>

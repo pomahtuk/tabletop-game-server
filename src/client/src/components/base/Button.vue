@@ -1,7 +1,7 @@
 <template>
   <button 
     @click="handleClick" 
-    v-bind:class="{'primary-button': primary, 'lines-inverse': linesInverse, 'glow': glow, 'wide': wide, 'skinny': skinny}"
+    :class="{'primary-button': primary, 'lines-inverse': linesInverse, 'glow': glow, 'wide': wide, 'skinny': skinny}"
   >
     <span v-if="avatarUrl" class="avatar">
       <img :src="avatarUrl" alt="user-avatar" />
@@ -28,7 +28,7 @@
     @Prop() private avatarUrl?: string;
     @Prop() private skinny?: boolean;
 
-    handleClick(e: Event) {
+    handleClick(e: Event): void {
       e.preventDefault();
       this.$emit('click');
     }

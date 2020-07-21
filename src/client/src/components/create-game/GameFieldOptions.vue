@@ -43,11 +43,11 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import LinesContainer from "./LinesContainer.vue";
+  import LinesContainer from "../base/LinesContainer.vue";
   import {Action, State} from "vuex-class";
   import {GameFieldSettings, GamePlayerSettings} from "@/store/state";
   import {actionTypes} from "@/store/actions";
-  import getPlanetLimit from "../../../server/gamelogic/helpers/getPlanetLimit";
+  import getPlanetLimit from "../../../../server/gamelogic/helpers/getPlanetLimit";
 
   @Component({
     components: {
@@ -62,9 +62,9 @@
     @Action(actionTypes.SET_GAME_FIELD_HEIGHT) setGameFieldHeight!: (height: number) => void
     @Action(actionTypes.SET_GAME_NEUTRAL_PLANETS_COUNT) setGameNeutralPlanetsCount!: (neutralPlanets: number) => void
     
-    get maxPlanets() {
+    get maxPlanets(): number {
       const fieldSize = this.gameFieldSettings.filedWidth * this.gameFieldSettings.fieldHeight;
-      return getPlanetLimit(fieldSize, this.gamePlayerSettings.numPlayers);
+      return getPlanetLimit(fieldSize, this.gamePlayerSettings.initialPlayers.length);
     }
   }
 </script>
