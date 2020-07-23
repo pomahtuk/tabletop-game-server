@@ -14,7 +14,7 @@
   import Button from "@/components/base/Button.vue";
   import PlayerTable from "@/components/create-game/PlayerTable.vue";
   import AddPlayer from "@/components/create-game/AddPlayer.vue";
-  import {actionTypes} from "@/store/actions";
+  import {actionTypes} from "@/store/create-game/actions";
 
   @Component({
     components: {

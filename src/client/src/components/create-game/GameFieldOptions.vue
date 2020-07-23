@@ -46,8 +46,8 @@
   import LinesContainer from "../base/LinesContainer.vue";
   import {Action, State} from "vuex-class";
   import {GameFieldSettings, GamePlayerSettings} from "@/store/state";
-  import {actionTypes} from "@/store/actions";
   import getPlanetLimit from "../../../../server/gamelogic/helpers/getPlanetLimit";
+  import {actionTypes} from "@/store/create-game/actions";
 
   @Component({
     components: {

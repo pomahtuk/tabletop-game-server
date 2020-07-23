@@ -20,8 +20,8 @@
 
   import {ComputerPlayerType} from "@/store/state";
   import {Action} from "vuex-class";
-  import {actionTypes, PlayerTypeString} from "@/store/actions";
   import Button from "@/components/base/Button.vue";
+  import {actionTypes, PlayerTypeString} from '@/store/create-game/actions';
   
   interface SelectItem {
     text: string;

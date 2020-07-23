@@ -3,7 +3,7 @@
     <h1>options</h1>
     <TextInput :value="gameSettings.name" @input="setGameName" type="text" placeholder="game name" />
     <!--  switch for pwd  -->
-    {{gameSettings.password || "none"}}
+    {{ gameSettings.password || "none" }}
   </LinesContainer>
 </template>
 
@@ -11,9 +11,9 @@
   import {Component, Vue} from 'vue-property-decorator';
   import LinesContainer from "../base/LinesContainer.vue";
   import {Action, State} from "vuex-class";
-  import { GameSettings} from "@/store/state";
-  import {actionTypes} from "@/store/actions";
+  import {GameSettings} from "@/store/state";
   import TextInput from "@/components/base/TextInput.vue";
+  import {actionTypes} from "@/store/create-game/actions";
 
   @Component({
     components: {

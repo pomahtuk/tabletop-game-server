@@ -61,9 +61,9 @@
   import { Component, Vue } from 'vue-property-decorator';
   import Button from "@/components/base/Button.vue";
   import TextInput from "@/components/base/TextInput.vue";
-  import {actionTypes} from "@/store/actions";
   import validateUser, { ValidationError } from "@/validators/validateUser";
   import {UserData} from "@/api/clinet";
+  import { actionTypes } from '@/store/auth/actions';
   
   export type Variant = "login" | "register" | "restore";
   

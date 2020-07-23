@@ -42,8 +42,8 @@
   import { Component, Vue } from 'vue-property-decorator';
   import { Action, State } from "vuex-class";
   import { User } from "@/store/state";
-  import { actionTypes } from "@/store/actions";
   import md5 from "blueimp-md5";
+  import { actionTypes } from './store/auth/actions';
 
   @Component({
     components: {

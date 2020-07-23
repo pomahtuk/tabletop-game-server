@@ -13,10 +13,6 @@
     @Prop() private label!: string;
     @Prop() private placeholder!: string;
     @Prop() private type!: "text" | "number" | "password";
-    
-    created(): void {
-      console.log(this.value)
-    }
 
     handleInput(e: InputEvent): void {
       this.$emit('input', (e.target as HTMLInputElement).value)

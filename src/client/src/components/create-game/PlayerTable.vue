@@ -22,7 +22,7 @@
   import Button from "@/components/base/Button.vue";
   import {Player} from "@/store/state";
   import {Action} from "vuex-class";
-  import {actionTypes} from "@/store/actions";
+  import {actionTypes} from "@/store/create-game/actions";
 
   @Component({
     components: {
