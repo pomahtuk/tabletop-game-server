@@ -1,6 +1,8 @@
 FROM node:14-alpine
 LABEL maintainer="pman89@ya.ru"
 
+ENV NODE_ENV "production"
+
 ENV PORT 8080
 EXPOSE 8080
 

@@ -10,6 +10,8 @@ import { PasswordResetService } from "../services/password.reset.service";
 import { MailerServiceImpl } from "../services/mailer.service";
 import { JWTVerify } from "../authenticators/jwt.authenticator";
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export default fp(async (fastify, _opts, next) => {
   const usersService = new UsersService();
   const mailerService = new MailerServiceImpl();
@@ -20,9 +22,9 @@ export default fp(async (fastify, _opts, next) => {
   );
 
   const cookieOptions: CookieSerializeOptions = {
-    // domain: 'your.domain',
+    domain: isDev ? undefined : '*.konquest.space',
     path: "/",
-    // secure: true, // send cookie over HTTPS only
+    secure: !isDev, // send cookie over HTTPS only
     httpOnly: true,
     // TODO: find a way to use it in secure way with localhost
     // sameSite: true, // alternative CSRF protection
