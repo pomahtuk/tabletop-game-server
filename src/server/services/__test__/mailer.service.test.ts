@@ -1,7 +1,7 @@
 import { MailerService, MailerServiceImpl } from "../mailer.service";
 import nodemailer from "nodemailer";
 
-describe("MailerService", (): void => {
+describe.skip("MailerService", (): void => {
   let mailerService: MailerService;
 
   it("Exports MailerServiceImpl", (): void => {
