@@ -92,6 +92,7 @@ process.on("unhandledRejection", (error: Error) => {
 
 const { PORT } = process.env;
 
+// some sampl!
 PORT ? start(parseInt(PORT, 10)) : start();
 
 process.on("SIGINT", async () => {
