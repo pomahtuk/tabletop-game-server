@@ -1,16 +1,25 @@
-import fp from "fastify-plugin";
-import { FastifyReply, FastifyRequest } from "fastify";
 import { GameService } from "../services/game.service";
 import { UsersService } from "../services/users.service";
 import { GameplayService } from "../services/gameplay.service";
-import { ServerResponse } from "http";
 import { JWTVerify } from "../authenticators/jwt.authenticator";
 import {
   getUserId,
   UserInGameVerify,
 } from "../authenticators/game.authenticator";
+import {
+  FastifyPluginOptions,
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  FastifySchema,
+} from "fastify";
+import { Game } from "../dao/entities/game";
+import { PlayerTurnOrder } from "../gamelogic/Player";
 
-export default fp(async (fastify, _opts, next) => {
+export default async function gameplayRoutes(
+  fastify: FastifyInstance,
+  _opts: FastifyPluginOptions
+) {
   const gameService = new GameService();
   const userService = new UsersService();
   const gameplayService = new GameplayService(gameService, userService);
@@ -23,8 +32,10 @@ export default fp(async (fastify, _opts, next) => {
     // TODO: add schema
     preHandler: fastify.auth([JWTVerify]),
     handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      request: FastifyRequest<{
+        Body: Partial<Game>;
+      }>,
+      reply: FastifyReply
     ) => {
       const game = await gameplayService.createGame(request.body);
       return reply.send(game);
@@ -37,10 +48,16 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: ["POST", "HEAD"],
     // TODO: add schema
+    // @ts-ignore - types issue, TODO: figure out proper way
     preHandler: fastify.auth([JWTVerify, UserInGameVerify]),
     handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      request: FastifyRequest<{
+        Params: {
+          gameId: string;
+        };
+        Body: PlayerTurnOrder[];
+      }>,
+      reply: FastifyReply
     ) => {
       const userId = getUserId(request.user);
       const game = await gameplayService.takePlayerTurn(
@@ -51,6 +68,4 @@ export default fp(async (fastify, _opts, next) => {
       return reply.send(game);
     },
   });
-
-  next();
-});
+}

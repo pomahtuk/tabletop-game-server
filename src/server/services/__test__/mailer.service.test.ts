@@ -14,9 +14,7 @@ describe("MailerService", (): void => {
     expect(service).toBeInstanceOf(MailerServiceImpl);
   });
 
-  it("Able to instantiate MailerServiceImpl from options", async (): Promise<
-    void
-  > => {
+  it("Able to instantiate MailerServiceImpl from options", async (): Promise<void> => {
     let testAccount = await nodemailer.createTestAccount();
 
     mailerService = new MailerServiceImpl({

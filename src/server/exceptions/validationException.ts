@@ -1,5 +1,5 @@
 import { HttpException } from "./httpException";
-import { BAD_REQUEST } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import { ValidationError } from "class-validator";
 
 export default class ValidationException extends HttpException {
@@ -25,7 +25,7 @@ export default class ValidationException extends HttpException {
             .map((e) => `- ${e};`)
             .join("\n")}`
         : message,
-      BAD_REQUEST
+      StatusCodes.BAD_REQUEST
     );
     this.errors = errorStrings;
   }

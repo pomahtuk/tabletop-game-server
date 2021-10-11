@@ -19,9 +19,9 @@ const placePlanets = ({
   fieldHeight,
   planetCount,
 }: PlaceNeutralPlanetsParams): void => {
-  const matrix: boolean[][] = Array.from(
-    new Array(fieldHeight)
-  ).map((): boolean[] => new Array(fieldHeight).fill(false));
+  const matrix: boolean[][] = Array.from(new Array(fieldHeight)).map(
+    (): boolean[] => new Array(fieldHeight).fill(false)
+  );
   // this is fully random as this is how it is done in KDE
 
   // place planet on random, update location in matrix;

@@ -2,7 +2,7 @@ import { UsersService } from "../users.service";
 import createTestConnection from "../../testhelpers/createTestConnection";
 import { PasswordResetService } from "../password.reset.service";
 import { HttpException } from "../../exceptions/httpException";
-import { BAD_REQUEST, NOT_FOUND, UNAUTHORIZED } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import ValidationException from "../../exceptions/validationException";
 import { MailerService } from "../mailer.service";
 import { FakeMailer } from "../../testhelpers/fakemailer";
@@ -15,20 +15,18 @@ describe("PasswordResetService", () => {
 
   const TEST_USER_EMAIL = "random.user.test@example.com";
 
-  beforeAll(
-    async (): Promise<void> => {
-      await createTestConnection();
-      usersService = new UsersService();
-      mailerService = new FakeMailer(mailFakeSender);
+  beforeAll(async (): Promise<void> => {
+    await createTestConnection();
+    usersService = new UsersService();
+    mailerService = new FakeMailer(mailFakeSender);
 
-      // create user
-      await usersService.createUser({
-        email: TEST_USER_EMAIL,
-        username: "does_not_matter",
-        password: "123456",
-      });
-    }
-  );
+    // create user
+    await usersService.createUser({
+      email: TEST_USER_EMAIL,
+      username: "does_not_matter",
+      password: "123456",
+    });
+  });
 
   it("Exports service", (): void => {
     expect(PasswordResetService).toBeDefined();
@@ -53,9 +51,7 @@ describe("PasswordResetService", () => {
     expect(mailFakeSender).toHaveBeenCalled();
   });
 
-  it("Would not reset password when password does not pass validation", async (): Promise<
-    void
-  > => {
+  it("Would not reset password when password does not pass validation", async (): Promise<void> => {
     expect.assertions(2);
     const { passwordResetToken } = await usersService.getUserByEmail(
       TEST_USER_EMAIL
@@ -67,8 +63,9 @@ describe("PasswordResetService", () => {
         password: "123",
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.status).toBe(BAD_REQUEST);
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.BAD_REQUEST);
     }
   });
 
@@ -89,9 +86,7 @@ describe("PasswordResetService", () => {
     expect(user.password).not.toBe(password);
   });
 
-  it("Would not reset password when flow not initiated or completed or token invalid", async (): Promise<
-    void
-  > => {
+  it("Would not reset password when flow not initiated or completed or token invalid", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await passwordResetService.resetPassword({
@@ -100,15 +95,14 @@ describe("PasswordResetService", () => {
         password: "564321",
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.status).toBe(UNAUTHORIZED);
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.UNAUTHORIZED);
     }
   });
 
   // expired token
-  it("Would not reset password if token is expired", async (): Promise<
-    void
-  > => {
+  it("Would not reset password if token is expired", async (): Promise<void> => {
     const user = await usersService.getUserByEmail(TEST_USER_EMAIL);
     user.passwordResetTokenExpiresAt = new Date();
     await usersService.saveUser(user);
@@ -121,15 +115,14 @@ describe("PasswordResetService", () => {
         password: "564321",
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.status).toBe(UNAUTHORIZED);
-      expect(error.message).toBe("Password reset token expired.");
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.UNAUTHORIZED);
+      expect(typedError.message).toBe("Password reset token expired.");
     }
   });
 
-  it("Would not start procedure for non-existing user", async (): Promise<
-    void
-  > => {
+  it("Would not start procedure for non-existing user", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await passwordResetService.resetPassword({
@@ -138,8 +131,9 @@ describe("PasswordResetService", () => {
         password: "564321",
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.status).toBe(NOT_FOUND);
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.NOT_FOUND);
     }
   });
 });

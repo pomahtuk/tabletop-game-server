@@ -1,4 +1,4 @@
-import fastify from "fastify";
+import fastify, { FastifyRequest, FastifyReply } from "fastify";
 import helmet from "fastify-helmet";
 import websocket from "fastify-websocket";
 import fastifyCookie from "fastify-cookie";
@@ -17,7 +17,7 @@ import gameplayRoutes from "./routes/gameplay.routes";
 
 const IS_TEST = process.env.NODE_ENV === "test";
 
-const server: fastify.FastifyInstance = fastify({
+const server = fastify({
   ajv: { customOptions: { schemaId: "auto" } },
   logger: true,
 });
@@ -28,6 +28,7 @@ server.register(jwt, {
   secret: "some secret super secret here",
   cookie: {
     cookieName: "token",
+    signed: true,
   },
 });
 server.register(
@@ -36,8 +37,9 @@ server.register(
     ? {
         type: "sqlite",
         database: ":memory:",
+        // @ts-ignore - types issue, options are valid
         dropSchema: true,
-        entities: ["src/dao/entities/*.ts"],
+        entities: ["src/server/dao/entities/*.ts"],
         synchronize: true,
         logging: false,
       }
@@ -62,27 +64,29 @@ server.register(userRoutes);
 server.register(authRoutes);
 server.register(gameplayRoutes);
 
-server.setErrorHandler((error, req, reply) => {
-  req.log.error(error);
-  reply.send(error);
-});
+server.setErrorHandler(
+  (error: Error, req: FastifyRequest, reply: FastifyReply) => {
+    req.log.error(error);
+    reply.send(error);
+  }
+);
 
 const start = async (port: number = IS_TEST ? 3001 : 3000) => {
   try {
     await server.listen(port, "0.0.0.0");
     console.log(`Started server at port ${port}`);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     server.log.error(err);
     process.exit(1);
   }
 };
 
-process.on("uncaughtException", (error) => {
+process.on("uncaughtException", (error: Error) => {
   console.error(error);
 });
 
-process.on("unhandledRejection", (error) => {
+process.on("unhandledRejection", (error: Error) => {
   console.error(error);
 });
 

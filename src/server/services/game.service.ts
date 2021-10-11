@@ -1,7 +1,7 @@
 import { DeleteResult, getRepository, Repository } from "typeorm";
 import { Game } from "../dao/entities/game";
 import { HttpException } from "../exceptions/httpException";
-import { BAD_REQUEST, FORBIDDEN, NOT_FOUND } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import getPlanetLimit from "../gamelogic/helpers/getPlanetLimit";
 
 export interface GetGamesOptions {
@@ -51,11 +51,17 @@ export class GameService {
     });
     if (game) {
       if (game.gameCode && gameCode && game.gameCode !== gameCode) {
-        throw new HttpException("Game code is not correct", FORBIDDEN);
+        throw new HttpException(
+          "Game code is not correct",
+          StatusCodes.FORBIDDEN
+        );
       }
       return game;
     }
-    throw new HttpException("Game with this id does not exist", NOT_FOUND);
+    throw new HttpException(
+      "Game with this id does not exist",
+      StatusCodes.NOT_FOUND
+    );
   }
 
   public createGame(newGame: Partial<Game>): Promise<Game> {
@@ -69,7 +75,10 @@ export class GameService {
       newGame.fieldHeight > 20
     ) {
       // 1 - field size
-      throw new HttpException("Incorrect or missing field size", BAD_REQUEST);
+      throw new HttpException(
+        "Incorrect or missing field size",
+        StatusCodes.BAD_REQUEST
+      );
     }
 
     if (
@@ -80,7 +89,7 @@ export class GameService {
       // 2 - num players
       throw new HttpException(
         "Incorrect or missing number of players",
-        BAD_REQUEST
+        StatusCodes.BAD_REQUEST
       );
     }
 
@@ -90,7 +99,10 @@ export class GameService {
       typeof newGame.neutralPlanetCount === "undefined" ||
       newGame.neutralPlanetCount < 0
     ) {
-      throw new HttpException("Missing number of neutral planets", BAD_REQUEST);
+      throw new HttpException(
+        "Missing number of neutral planets",
+        StatusCodes.BAD_REQUEST
+      );
     }
 
     const neutralPlanetsLimit = getPlanetLimit(
@@ -100,7 +112,7 @@ export class GameService {
     if (newGame.neutralPlanetCount > neutralPlanetsLimit) {
       throw new HttpException(
         `Too many neutral planets requested, limit for current field size: ${neutralPlanetsLimit}`,
-        BAD_REQUEST
+        StatusCodes.BAD_REQUEST
       );
     }
 
@@ -112,7 +124,7 @@ export class GameService {
       // game status - should not be there
       throw new HttpException(
         "Setting game status is not allowed",
-        BAD_REQUEST
+        StatusCodes.BAD_REQUEST
       );
     }
 
@@ -120,7 +132,7 @@ export class GameService {
       // winnerId - should not be there
       throw new HttpException(
         "Setting winner id right away is not allowed",
-        BAD_REQUEST
+        StatusCodes.BAD_REQUEST
       );
     }
 
@@ -128,7 +140,7 @@ export class GameService {
       // waitingForPlayer - should not be there
       throw new HttpException(
         "Setting waitingForPlayer is not allowed",
-        BAD_REQUEST
+        StatusCodes.BAD_REQUEST
       );
     }
 

@@ -1,18 +1,23 @@
-import fp from "fastify-plugin";
-
-import { FastifyRequest, FastifyReply, CookieSerializeOptions } from "fastify";
-import { ServerResponse } from "http";
-
 import { postUserSchema } from "../schemas/user.schema";
 import { UsersService } from "../services/users.service";
 import { AuthService } from "../services/auth.service";
 import { PasswordResetService } from "../services/password.reset.service";
 import { MailerServiceImpl } from "../services/mailer.service";
 import { JWTVerify } from "../authenticators/jwt.authenticator";
+import {
+  FastifyPluginOptions,
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
+import { User } from "../dao/entities/user";
 
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV !== "production";
 
-export default fp(async (fastify, _opts, next) => {
+export default async function authRoutes(
+  fastify: FastifyInstance,
+  _opts: FastifyPluginOptions
+) {
   const usersService = new UsersService();
   const mailerService = new MailerServiceImpl();
   const authService = new AuthService(usersService, mailerService);
@@ -21,8 +26,8 @@ export default fp(async (fastify, _opts, next) => {
     mailerService
   );
 
-  const cookieOptions: CookieSerializeOptions = {
-    domain: isDev ? undefined : '*.konquest.space',
+  const cookieOptions = {
+    domain: isDev ? undefined : "*.konquest.space",
     path: "/",
     secure: !isDev, // send cookie over HTTPS only
     httpOnly: true,
@@ -36,10 +41,7 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: "POST",
     schema: postUserSchema,
-    handler: async (
-      req: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (req: FastifyRequest, reply: FastifyReply) => {
       const user = await authService.register(req.body);
       const token = await reply.jwtSign({ ...user });
 
@@ -54,8 +56,12 @@ export default fp(async (fastify, _opts, next) => {
     method: "POST",
     // TODO: activation schema here
     handler: async (
-      req: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      req: FastifyRequest<{
+        Params: {
+          code: string;
+        };
+      }>,
+      reply: FastifyReply
     ) => {
       const user = await authService.activateUser(req.params.code);
       const token = await reply.jwtSign({ ...user });
@@ -70,8 +76,10 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: "POST",
     handler: async (
-      req: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      req: FastifyRequest<{
+        Body: User;
+      }>,
+      reply: FastifyReply
     ) => {
       const user = await authService.getAuthenticatedUser(
         req.body.email,
@@ -91,10 +99,7 @@ export default fp(async (fastify, _opts, next) => {
     url: "/auth/logout",
     logLevel: "warn",
     method: "POST",
-    handler: async (
-      req: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (req: FastifyRequest, reply: FastifyReply) => {
       return reply.clearCookie("token", cookieOptions).send({ status: "OK" });
     },
   });
@@ -105,8 +110,10 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: "POST",
     handler: async (
-      req: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      req: FastifyRequest<{
+        Body: User;
+      }>,
+      reply: FastifyReply
     ) => {
       const email: string = req.body["email"];
       await passwordResetService.startPasswordReset(email);
@@ -120,8 +127,10 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: "POST",
     handler: async (
-      req: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      req: FastifyRequest<{
+        Body: User & { token: string };
+      }>,
+      reply: FastifyReply
     ) => {
       const email: string = req.body["email"];
       const token: string = req.body["token"];
@@ -135,18 +144,14 @@ export default fp(async (fastify, _opts, next) => {
     },
   });
 
-  // complete password reset
+  // check auth
   fastify.route({
     url: "/auth/check",
     logLevel: "warn",
     method: "GET",
     preHandler: fastify.auth([JWTVerify]),
-    handler: async (
-      req: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (req: FastifyRequest, reply: FastifyReply) => {
       return reply.send(req.user);
     },
   });
-  next();
-});
+}

@@ -1,8 +1,8 @@
 import { UsersService } from "./users.service";
 import crypto from "crypto";
-import { hashPassword, validatePassword } from "../helpres/password";
+import { hashPassword, validatePassword } from "../helpers/password";
 import { HttpException } from "../exceptions/httpException";
-import { UNAUTHORIZED } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import ValidationException from "../exceptions/validationException";
 import { MailerService } from "./mailer.service";
 
@@ -39,14 +39,20 @@ export class PasswordResetService {
       user.passwordResetToken !== req.token ||
       !user.passwordResetTokenExpiresAt
     ) {
-      throw new HttpException("Could not change password", UNAUTHORIZED);
+      throw new HttpException(
+        "Could not change password",
+        StatusCodes.UNAUTHORIZED
+      );
     }
 
     // check if timeline is nice
     const dateDiff = user.passwordResetTokenExpiresAt.getTime() - Date.now();
 
     if (dateDiff < 0) {
-      throw new HttpException("Password reset token expired.", UNAUTHORIZED);
+      throw new HttpException(
+        "Password reset token expired.",
+        StatusCodes.UNAUTHORIZED
+      );
     }
 
     const pwdError = await validatePassword(req.password);

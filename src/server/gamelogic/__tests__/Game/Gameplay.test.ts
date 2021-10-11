@@ -17,50 +17,46 @@ describe("Could have a game", (): void => {
     return await gameplayService.takePlayerTurn(gameId, playerId, []);
   };
 
-  beforeAll(
-    async (): Promise<void> => {
-      await createTestConnection();
-      let usersService = new UsersService();
-      gameService = new GameService();
+  beforeAll(async (): Promise<void> => {
+    await createTestConnection();
+    let usersService = new UsersService();
+    gameService = new GameService();
 
-      // create two users
-      player1 = await usersService.createUser({
-        username: "game_users_1",
-        password: "sample_pwd1",
-        email: "game.users.1@example.com",
-      });
+    // create two users
+    player1 = await usersService.createUser({
+      username: "game_users_1",
+      password: "sample_pwd1",
+      email: "game.users.1@example.com",
+    });
 
-      player2 = await usersService.createUser({
-        username: "game_users_2",
-        password: "sample_pwd2",
-        email: "game.users.2@example.com",
-      });
+    player2 = await usersService.createUser({
+      username: "game_users_2",
+      password: "sample_pwd2",
+      email: "game.users.2@example.com",
+    });
 
-      gameplayService = new GameplayService(gameService, usersService);
+    gameplayService = new GameplayService(gameService, usersService);
 
-      const game = await gameplayService.createGame({
-        fieldHeight: 4,
-        fieldWidth: 4,
-        numPlayers: 2,
-        neutralPlanetCount: 1,
-        initialPlayers: {
-          "0": player1,
-          "1": player2,
-        },
-      });
+    const game = await gameplayService.createGame({
+      fieldHeight: 4,
+      fieldWidth: 4,
+      numPlayers: 2,
+      neutralPlanetCount: 1,
+      initialPlayers: {
+        "0": player1,
+        "1": player2,
+      },
+    });
 
-      gameId = game.id!;
-    }
-  );
+    gameId = game.id!;
+  });
 
   // strategy here -
   // player2 just sitting on own planet accumulating ships
   // player 1 - waiting 3 turns and capturing neutral planet and sitting for a while accumulating ships
   // then when enough produced - combining fleets at neutral
   // and attacking player 2 capturing their planet
-  it("Returns invalid status when passing invalid turn", async (): Promise<
-    void
-  > => {
+  it("Returns invalid status when passing invalid turn", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await gameplayService.takePlayerTurn(gameId, player1.id, [
@@ -70,15 +66,14 @@ describe("Could have a game", (): void => {
           amount: 10,
         },
       ]);
-    } catch (e) {
-      expect(e).toBeDefined();
-      expect(e.message).toMatch("Turn data invalid");
+    } catch (error) {
+      const typedError = error as Error;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toMatch("Turn data invalid");
     }
   });
 
-  it("Does not let player 2 take turn before player 1", async (): Promise<
-    void
-  > => {
+  it("Does not let player 2 take turn before player 1", async (): Promise<void> => {
     expect.assertions(3);
     try {
       await gameplayService.takePlayerTurn(gameId, player1.id, [
@@ -88,9 +83,10 @@ describe("Could have a game", (): void => {
           amount: 10,
         },
       ]);
-    } catch (e) {
-      expect(e).toBeDefined();
-      expect(e.message).toMatch("Turn data invalid");
+    } catch (error) {
+      const typedError = error as Error;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toMatch("Turn data invalid");
       const game = await gameService.getGame(gameId);
       expect(game.waitingForPlayer).toBe(0);
     }
@@ -100,9 +96,7 @@ describe("Could have a game", (): void => {
     await makeEmptyPlayerTurn(player1.id);
   });
 
-  it("Does not accept player 1 turn for second time", async (): Promise<
-    void
-  > => {
+  it("Does not accept player 1 turn for second time", async (): Promise<void> => {
     expect.assertions(3);
 
     const game = await gameService.getGame(gameId);
@@ -116,9 +110,10 @@ describe("Could have a game", (): void => {
           amount: 10,
         },
       ]);
-    } catch (e) {
-      expect(e).toBeDefined();
-      expect(e.message).toMatch("Turn data invalid");
+    } catch (error) {
+      const typedError = error as Error;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toMatch("Turn data invalid");
     }
   });
 
@@ -204,9 +199,7 @@ describe("Could have a game", (): void => {
   });
 
   // now game should not accept new turns
-  it("Does not accept any player turns after game completion", async (): Promise<
-    void
-  > => {
+  it("Does not accept any player turns after game completion", async (): Promise<void> => {
     const result = await makeEmptyPlayerTurn(player1.id);
     expect(result).toBe(TurnStatus.IGNORED);
   });

@@ -7,13 +7,12 @@ describe("server test", (): void => {
 
   beforeAll(async () => await server.ready());
 
-  test("responds with 404 on request /", async (done) => {
+  test("responds with 404 on request /", async () => {
     const response = await server.inject({
       method: "GET",
       url: "/",
     });
 
     expect(response.statusCode).toBe(404);
-    done();
   });
 });

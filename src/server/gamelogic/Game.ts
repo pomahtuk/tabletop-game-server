@@ -50,9 +50,8 @@ const processTurn = (game: Game, statsMap: PlayerStatsMap) => {
           destination: destinationPlanet.name,
         })
       );
-      game.fleetTimelineObj.fleetTimeline[
-        fleetTimelineIndex
-      ] = fleetTimelinePoint;
+      game.fleetTimelineObj.fleetTimeline[fleetTimelineIndex] =
+        fleetTimelinePoint;
       originPlanet.ships -= order.amount;
     }
   }

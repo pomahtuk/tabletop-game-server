@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
-import { UNAUTHORIZED } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import { v4 as uuidv4 } from "uuid";
 
 import { UsersService } from "./users.service";
 import { User } from "../dao/entities/user";
 import { HttpException } from "../exceptions/httpException";
-import { hashPassword, validatePassword } from "../helpres/password";
+import { hashPassword, validatePassword } from "../helpers/password";
 import ValidationException from "../exceptions/validationException";
 import { MailerService } from "./mailer.service";
 
@@ -41,7 +41,10 @@ export class AuthService {
     const user = await this.usersService.getUserByEmail(email);
     // do not allow not activated users to login
     if (!user.isActive) {
-      throw new HttpException("User was not activated", UNAUTHORIZED);
+      throw new HttpException(
+        "User was not activated",
+        StatusCodes.UNAUTHORIZED
+      );
     }
     await AuthService.verifyPassword(plainTextPassword, user.password);
     return AuthService.cleanUpUser(user);
@@ -63,12 +66,15 @@ export class AuthService {
       hashedPassword
     );
     if (!isPasswordMatching) {
-      throw new HttpException("Wrong credentials provided", UNAUTHORIZED);
+      throw new HttpException(
+        "Wrong credentials provided",
+        StatusCodes.UNAUTHORIZED
+      );
     }
   }
 
   private static cleanUpUser(user: User): User {
-    delete user.password;
+    user.password = "";
     return user;
   }
 }

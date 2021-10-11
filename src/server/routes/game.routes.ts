@@ -1,12 +1,19 @@
 import fp from "fastify-plugin";
 
 import { listGamesSchema, getGameSchema } from "../schemas/game.schema";
-import { FastifyRequest, FastifyReply } from "fastify";
-import { ServerResponse } from "http";
+import {
+  FastifyInstance,
+  FastifyRequest,
+  FastifyReply,
+  FastifyPluginOptions,
+} from "fastify";
 import { GameService } from "../services/game.service";
 import { JWTVerify } from "../authenticators/jwt.authenticator";
 
-export default fp(async (fastify, _opts, next) => {
+export default async function gameRoutes(
+  fastify: FastifyInstance,
+  _opts: FastifyPluginOptions
+) {
   const gameService = new GameService();
 
   // list
@@ -15,10 +22,7 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: ["GET", "HEAD"],
     schema: listGamesSchema,
-    handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
       // TODO: ordering and filtering
       const games = await gameService.getGames();
       return reply.send(games);
@@ -32,8 +36,12 @@ export default fp(async (fastify, _opts, next) => {
     method: ["GET", "HEAD"],
     schema: getGameSchema,
     handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      request: FastifyRequest<{
+        Params: {
+          gameId: string;
+        };
+      }>,
+      reply: FastifyReply
     ) => {
       // TODO: gameCode
       const game = await gameService.getGame(request.params.gameId);
@@ -48,14 +56,16 @@ export default fp(async (fastify, _opts, next) => {
     method: ["DELETE"],
     preHandler: fastify.auth([JWTVerify]),
     handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      request: FastifyRequest<{
+        Params: {
+          gameId: string;
+        };
+      }>,
+      reply: FastifyReply
     ) => {
       // todo: check who created game as only creator should be able to delete
       const result = await gameService.deleteGame(request.params.gameId);
       return reply.send(result);
     },
   });
-
-  next();
-});
+}

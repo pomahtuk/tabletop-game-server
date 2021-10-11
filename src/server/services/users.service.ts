@@ -1,10 +1,10 @@
-import { getRepository, Repository, DeleteResult } from "typeorm";
 import {
-  BAD_REQUEST,
-  FORBIDDEN,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-} from "http-status-codes";
+  getRepository,
+  Repository,
+  DeleteResult,
+  QueryFailedError,
+} from "typeorm";
+import { StatusCodes } from "http-status-codes";
 
 import { User, UserData } from "../dao/entities/user";
 import { HttpException } from "../exceptions/httpException";
@@ -34,7 +34,10 @@ export class UsersService {
     if (user) {
       return user;
     }
-    throw new HttpException("User with this id does not exist", NOT_FOUND);
+    throw new HttpException(
+      "User with this id does not exist",
+      StatusCodes.NOT_FOUND
+    );
   }
 
   public async getUserByEmail(email: string): Promise<User> {
@@ -42,7 +45,10 @@ export class UsersService {
     if (user) {
       return user;
     }
-    throw new HttpException("User with this email does not exist", NOT_FOUND);
+    throw new HttpException(
+      "User with this email does not exist",
+      StatusCodes.NOT_FOUND
+    );
   }
 
   public async getUserByActivationCode(activationCode: string): Promise<User> {
@@ -52,7 +58,7 @@ export class UsersService {
     }
     throw new HttpException(
       "User with this activation code does not exist",
-      NOT_FOUND
+      StatusCodes.NOT_FOUND
     );
   }
 
@@ -66,11 +72,16 @@ export class UsersService {
       const user = this.repo.create(userInstance);
       return await this.repo.save(user);
     } catch (error) {
-      if (error.code === "SQLITE_CONSTRAINT" || error.code === "ER_DUP_ENTRY") {
+      // TODO: not any! use proper types!
+      const typedError = error as any;
+      if (
+        typedError.code === "SQLITE_CONSTRAINT" ||
+        typedError.code === "ER_DUP_ENTRY"
+      ) {
         throw new HttpException(
           "User with that email or username already exists",
-          BAD_REQUEST,
-          error
+          StatusCodes.BAD_REQUEST,
+          typedError
         );
       }
       // NOTE: ignoring branch not corresponding to expected exception as other exceptions
@@ -78,8 +89,8 @@ export class UsersService {
       /* istanbul ignore next */
       throw new HttpException(
         "Something went wrong",
-        INTERNAL_SERVER_ERROR,
-        error
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        typedError
       );
     }
   }
@@ -87,7 +98,10 @@ export class UsersService {
   public async updateUser(userId: string, newUser: any): Promise<User> {
     // prevent overriding of Id;
     if (newUser.id && newUser.id !== userId) {
-      throw new HttpException("Changing User id is forbidden", FORBIDDEN);
+      throw new HttpException(
+        "Changing User id is forbidden",
+        StatusCodes.FORBIDDEN
+      );
     }
     const userInstance = await UsersService.validateIncomingUser(newUser);
     const user = await this.getUser(userId);
@@ -95,11 +109,16 @@ export class UsersService {
       this.repo.merge(user, userInstance);
       return await this.repo.save(user);
     } catch (error) {
-      if (error.code === "SQLITE_CONSTRAINT" || error.code === "ER_DUP_ENTRY") {
+      // TODO: not any! use proper types!
+      const typedError = error as any;
+      if (
+        typedError.code === "SQLITE_CONSTRAINT" ||
+        typedError.code === "ER_DUP_ENTRY"
+      ) {
         throw new HttpException(
           "User with that email or username already exists",
-          BAD_REQUEST,
-          error
+          StatusCodes.BAD_REQUEST,
+          typedError
         );
       }
       // NOTE: ignoring branch not corresponding to expected exception as other exceptions
@@ -107,8 +126,8 @@ export class UsersService {
       /* istanbul ignore next */
       throw new HttpException(
         "Something went wrong",
-        INTERNAL_SERVER_ERROR,
-        error
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        typedError
       );
     }
   }
@@ -118,11 +137,16 @@ export class UsersService {
       await UsersService.validateUserInstance(user);
       return await this.repo.save(user);
     } catch (error) {
-      if (error.code === "SQLITE_CONSTRAINT" || error.code === "ER_DUP_ENTRY") {
+      // TODO: not any! use proper types!
+      const typedError = error as any;
+      if (
+        typedError.code === "SQLITE_CONSTRAINT" ||
+        typedError.code === "ER_DUP_ENTRY"
+      ) {
         throw new HttpException(
           "User with that email or username already exists",
-          BAD_REQUEST,
-          error
+          StatusCodes.BAD_REQUEST,
+          typedError
         );
       }
       // NOTE: ignoring branch not corresponding to expected exception as other exceptions
@@ -130,8 +154,8 @@ export class UsersService {
       /* istanbul ignore next */
       throw new HttpException(
         "Something went wrong",
-        INTERNAL_SERVER_ERROR,
-        error
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        typedError
       );
     }
   }

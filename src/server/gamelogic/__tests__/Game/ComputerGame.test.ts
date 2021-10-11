@@ -25,37 +25,35 @@ describe("Could have a game with Computer player", (): void => {
     return await gameplayService.takePlayerTurn(gameId, player1.id, []);
   };
 
-  beforeAll(
-    async (): Promise<void> => {
-      await createTestConnection();
-      let usersService = new UsersService();
-      gameService = new GameService();
+  beforeAll(async (): Promise<void> => {
+    await createTestConnection();
+    let usersService = new UsersService();
+    gameService = new GameService();
 
-      // create two users
-      player1 = await usersService.createUser({
-        username: "game_base_1",
-        password: "sample_pwd1",
-        email: "game.base.1@example.com",
-      });
+    // create two users
+    player1 = await usersService.createUser({
+      username: "game_base_1",
+      password: "sample_pwd1",
+      email: "game.base.1@example.com",
+    });
 
-      gameplayService = new GameplayService(gameService, usersService);
+    gameplayService = new GameplayService(gameService, usersService);
 
-      statsRepo = getRepository(GameUserStats);
+    statsRepo = getRepository(GameUserStats);
 
-      const game = await gameplayService.createGame({
-        fieldHeight: 4,
-        fieldWidth: 4,
-        numPlayers: 2,
-        neutralPlanetCount: 1,
-        initialPlayers: {
-          "0": player1,
-          "1": computer,
-        },
-      });
+    const game = await gameplayService.createGame({
+      fieldHeight: 4,
+      fieldWidth: 4,
+      numPlayers: 2,
+      neutralPlanetCount: 1,
+      initialPlayers: {
+        "0": player1,
+        "1": computer,
+      },
+    });
 
-      gameId = game.id!;
-    }
-  );
+    gameId = game.id!;
+  });
 
   // here, as only used for computer player
   it("can find playerFleets", (): void => {
@@ -87,9 +85,7 @@ describe("Could have a game with Computer player", (): void => {
     expect(playerFleets).toHaveLength(2);
   });
 
-  it("Can stop game if only computer players are left", async (): Promise<
-    void
-  > => {
+  it("Can stop game if only computer players are left", async (): Promise<void> => {
     const anotherComp = new ComputerPlayerHard(undefined, "another");
     const ownGame = await gameplayService.createGame({
       initialPlayers: {

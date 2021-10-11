@@ -1,8 +1,9 @@
 import { UsersService } from "../users.service";
 import createTestConnection from "../../testhelpers/createTestConnection";
-import { BAD_REQUEST } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import { v4 } from "uuid";
 import { User } from "../../dao/entities/user";
+import { HttpException } from "../../exceptions/httpException";
 
 describe("UsersService", () => {
   let usersService: UsersService;
@@ -11,11 +12,9 @@ describe("UsersService", () => {
   const TEST_USER_ACTIVATION_CODE = v4();
   let testUserId: string;
 
-  beforeAll(
-    async (): Promise<void> => {
-      await createTestConnection();
-    }
-  );
+  beforeAll(async (): Promise<void> => {
+    await createTestConnection();
+  });
 
   it("Exports service", (): void => {
     expect(UsersService).toBeDefined();
@@ -56,9 +55,7 @@ describe("UsersService", () => {
     expect(users.length).toBe(1);
   });
 
-  it("Returns error on creating user with existing username", async (): Promise<
-    void
-  > => {
+  it("Returns error on creating user with existing username", async (): Promise<void> => {
     expect.assertions(2);
 
     const email = "random.user.test.exitsing.username@example.com";
@@ -72,16 +69,15 @@ describe("UsersService", () => {
         password,
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toBe(
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe(
         "User with that email or username already exists"
       );
     }
   });
 
-  it("Returns error on creating user with existing email", async (): Promise<
-    void
-  > => {
+  it("Returns error on creating user with existing email", async (): Promise<void> => {
     expect.assertions(2);
 
     const username = "testuser2";
@@ -94,8 +90,9 @@ describe("UsersService", () => {
         password,
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toBe(
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe(
         "User with that email or username already exists"
       );
     }
@@ -140,9 +137,10 @@ describe("UsersService", () => {
         id: "some",
         username: "updated",
       });
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toBe("Changing User id is forbidden");
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe("Changing User id is forbidden");
     }
   });
 
@@ -155,18 +153,17 @@ describe("UsersService", () => {
         password: "1234567890",
       });
       await usersService.saveUser(user);
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.status).toBe(BAD_REQUEST);
-      expect(exception.message).toBe(
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.BAD_REQUEST);
+      expect(typedError.message).toBe(
         "User with that email or username already exists"
       );
     }
   });
 
-  it("Throwing validation error when username is too short", async (): Promise<
-    void
-  > => {
+  it("Throwing validation error when username is too short", async (): Promise<void> => {
     expect.assertions(2);
     const userWithShortPassword = {
       username: "srt",
@@ -175,17 +172,16 @@ describe("UsersService", () => {
     };
     try {
       await usersService.createUser(userWithShortPassword);
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toContain(
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toContain(
         "Must be between 4 and 255 characters long"
       );
     }
   });
 
-  it("Throwing validation error when username does not match regex", async (): Promise<
-    void
-  > => {
+  it("Throwing validation error when username does not match regex", async (): Promise<void> => {
     expect.assertions(2);
     const userWithShortPassword = {
       username: "hello there",
@@ -194,9 +190,10 @@ describe("UsersService", () => {
     };
     try {
       await usersService.createUser(userWithShortPassword);
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toContain(
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toContain(
         "Can only contain numbers, letters and symbols"
       );
     }
@@ -212,9 +209,7 @@ describe("UsersService", () => {
     expect(deletionResult).toBeDefined();
   });
 
-  it("Returns error when setting user email to already existing one", async (): Promise<
-    void
-  > => {
+  it("Returns error when setting user email to already existing one", async (): Promise<void> => {
     expect.assertions(2);
     const user = await usersService.createUser({
       email: "non_existent@example.com",
@@ -225,18 +220,17 @@ describe("UsersService", () => {
       await usersService.updateUser(testUserId, {
         email: user.email,
       });
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toBe(
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe(
         "User with that email or username already exists"
       );
     }
     await usersService.deleteUser(user.id as string);
   });
 
-  it("Returns error when setting user username to already existing one", async (): Promise<
-    void
-  > => {
+  it("Returns error when setting user username to already existing one", async (): Promise<void> => {
     expect.assertions(2);
     const user = await usersService.createUser({
       email: "non_existent1@example.com",
@@ -247,48 +241,46 @@ describe("UsersService", () => {
       await usersService.updateUser(testUserId, {
         username: user.username,
       });
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toBe(
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe(
         "User with that email or username already exists"
       );
     }
     await usersService.deleteUser(user.id as string);
   });
 
-  it("Throwing error when user with given id does not exist", async (): Promise<
-    void
-  > => {
+  it("Throwing error when user with given id does not exist", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await usersService.getUser("111");
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toBe("User with this id does not exist");
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe("User with this id does not exist");
     }
   });
 
-  it("Throwing error when user with given email does not exist", async (): Promise<
-    void
-  > => {
+  it("Throwing error when user with given email does not exist", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await usersService.getUserByEmail("111");
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toBe("User with this email does not exist");
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe("User with this email does not exist");
     }
   });
 
-  it("Trowing an error when user with given activationCode does not exist", async (): Promise<
-    void
-  > => {
+  it("Trowing an error when user with given activationCode does not exist", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await usersService.getUserByActivationCode("111");
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toBe(
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe(
         "User with this activation code does not exist"
       );
     }

@@ -2,9 +2,10 @@ import createTestConnection from "../../testhelpers/createTestConnection";
 import { AuthService } from "../auth.service";
 import { UsersService } from "../users.service";
 import { User } from "../../dao/entities/user";
-import { NOT_FOUND, UNAUTHORIZED } from "http-status-codes";
 import { FakeMailer } from "../../testhelpers/fakemailer";
 import { MailerService } from "../mailer.service";
+import { StatusCodes } from "http-status-codes";
+import { HttpException } from "../../exceptions/httpException";
 
 describe("UsersService", () => {
   let authService: AuthService;
@@ -18,13 +19,11 @@ describe("UsersService", () => {
 
   let userActivationCode: string;
 
-  beforeAll(
-    async (): Promise<void> => {
-      await createTestConnection();
-      usersService = new UsersService();
-      mailerService = new FakeMailer(mailFakeSender);
-    }
-  );
+  beforeAll(async (): Promise<void> => {
+    await createTestConnection();
+    usersService = new UsersService();
+    mailerService = new FakeMailer(mailFakeSender);
+  });
 
   it("Exports service", (): void => {
     expect(AuthService).toBeDefined();
@@ -44,7 +43,7 @@ describe("UsersService", () => {
 
     expect(newUser).toBeDefined();
     expect(newUser).toBeInstanceOf(User);
-    expect(newUser.password).not.toBeDefined();
+    expect(newUser.password).toBe("");
     expect(newUser.username).toBe(TEST_USERNAME);
     expect(newUser.email).toBe(TEST_EMAIL);
     expect(newUser.activationCode).toBeDefined();
@@ -68,16 +67,15 @@ describe("UsersService", () => {
         email: TEST_EMAIL,
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toContain(
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toContain(
         "User with that email or username already exists"
       );
     }
   });
 
-  it("Does not register user with existing username", async (): Promise<
-    void
-  > => {
+  it("Does not register user with existing username", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await authService.register({
@@ -86,16 +84,15 @@ describe("UsersService", () => {
         email: "sample_auth_user1@example.com",
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toContain(
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toContain(
         "User with that email or username already exists"
       );
     }
   });
 
-  it("Does not register user with invalid password", async (): Promise<
-    void
-  > => {
+  it("Does not register user with invalid password", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await authService.register({
@@ -104,8 +101,9 @@ describe("UsersService", () => {
         email: "sample_auth_user1@example.com",
       });
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toContain(
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toContain(
         "property password has failed the following constraints"
       );
     }
@@ -116,8 +114,9 @@ describe("UsersService", () => {
     try {
       await authService.getAuthenticatedUser(TEST_EMAIL, TEST_PWD);
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.status).toBe(UNAUTHORIZED);
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.UNAUTHORIZED);
     }
   });
 
@@ -131,31 +130,29 @@ describe("UsersService", () => {
   it("Able to authenticate valid user/pwd pair", async (): Promise<void> => {
     const user = await authService.getAuthenticatedUser(TEST_EMAIL, TEST_PWD);
     expect(user).toBeDefined();
-    expect(user.password).not.toBeDefined();
+    expect(user.password).toBe("");
     expect(user.username).toBe(TEST_USERNAME);
   });
 
-  it("Able to return proper error on not found user", async (): Promise<
-    void
-  > => {
+  it("Able to return proper error on not found user", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await authService.getAuthenticatedUser("random.email@me.com", TEST_PWD);
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.status).toBe(NOT_FOUND);
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.NOT_FOUND);
     }
   });
 
-  it("Able to return proper error on incorrect password", async (): Promise<
-    void
-  > => {
+  it("Able to return proper error on incorrect password", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await authService.getAuthenticatedUser(TEST_EMAIL, "random");
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.status).toBe(UNAUTHORIZED);
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.status).toBe(StatusCodes.UNAUTHORIZED);
     }
   });
 });

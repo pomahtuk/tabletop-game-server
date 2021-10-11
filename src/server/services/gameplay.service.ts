@@ -1,7 +1,12 @@
 import { GameService } from "./game.service";
 import { UsersService } from "./users.service";
 import { User } from "../dao/entities/user";
-import { Player, PlayerStatsMap, PlayerTurnOrder } from "../gamelogic/Player";
+import {
+  Player,
+  PlayerStats,
+  PlayerStatsMap,
+  PlayerTurnOrder,
+} from "../gamelogic/Player";
 import { Game, PlayerIndexMap } from "../dao/entities/game";
 import {
   addPlayerTurnData,
@@ -10,7 +15,7 @@ import {
   TurnStatus,
 } from "../gamelogic/Game";
 import { HttpException } from "../exceptions/httpException";
-import { BAD_REQUEST } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import Planet from "../gamelogic/Planet";
 import getPlanetName from "../gamelogic/helpers/getPlanetName";
 import { GameUserStats } from "../dao/entities/gameuserstats";
@@ -42,7 +47,7 @@ export class GameplayService {
     ) {
       throw new HttpException(
         "Sent more initial players than game supports",
-        BAD_REQUEST
+        StatusCodes.BAD_REQUEST
       );
     }
 
@@ -169,10 +174,13 @@ export class GameplayService {
     const gameStats = await this.statsRepo.find({
       gameId: gameId,
     });
-    return gameStats.reduce((acc: PlayerStatsMap, stat) => {
-      acc[stat.userId] = stat;
-      return acc;
-    }, {});
+    return gameStats.reduce(
+      (acc: PlayerStatsMap, stat: PlayerStats & { userId: string }) => {
+        acc[stat.userId] = stat;
+        return acc;
+      },
+      {}
+    );
   }
 
   private static cleanUpUser(user: User): Player {
@@ -196,7 +204,7 @@ export class GameplayService {
       stats
     );
     if (turnStatus === TurnStatus.INVALID) {
-      throw new HttpException("Turn data invalid", BAD_REQUEST);
+      throw new HttpException("Turn data invalid", StatusCodes.BAD_REQUEST);
     }
     // TODO: error handling
     await getManager().transaction(async (transactionalEntityManager) => {

@@ -1,19 +1,21 @@
-import fp from "fastify-plugin";
+import {
+  FastifyInstance,
+  FastifyPluginCallback,
+  FastifyPluginOptions,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 
-import { FastifyRequest, FastifyReply } from "fastify";
-import { ServerResponse } from "http";
-
-export default fp(async (fastify, _opts, next) => {
+export default async function statusRoutes(
+  fastify: FastifyInstance,
+  _opts: FastifyPluginOptions
+) {
   fastify.route({
     url: "/status",
     logLevel: "warn",
     method: ["GET", "HEAD"],
-    handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
       return reply.send({ date: new Date(), works: true });
     },
   });
-  next();
-});
+}

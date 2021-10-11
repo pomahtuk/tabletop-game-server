@@ -1,5 +1,6 @@
 import { GameService } from "../game.service";
 import createTestConnection from "../../testhelpers/createTestConnection";
+import { HttpException } from "../../exceptions/httpException";
 
 describe("GameService", () => {
   let gameService: GameService;
@@ -7,11 +8,9 @@ describe("GameService", () => {
   let privateGameId: string;
   const gameCode = "12345";
 
-  beforeAll(
-    async (): Promise<void> => {
-      await createTestConnection();
-    }
-  );
+  beforeAll(async (): Promise<void> => {
+    await createTestConnection();
+  });
 
   it("Exports service", (): void => {
     expect(GameService).toBeDefined();
@@ -85,16 +84,15 @@ describe("GameService", () => {
     expect(game.id).toBe(publicGameId);
   });
 
-  it("Returns error on getting private game with wrong code", async (): Promise<
-    void
-  > => {
+  it("Returns error on getting private game with wrong code", async (): Promise<void> => {
     expect.assertions(2);
 
     try {
       await gameService.getGame(privateGameId, "wrong");
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toBe("Game code is not correct");
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe("Game code is not correct");
     }
   });
 
@@ -116,15 +114,14 @@ describe("GameService", () => {
     expect(deletionResult).toBeDefined();
   });
 
-  it("Throwing error when game with given id does not exist", async (): Promise<
-    void
-  > => {
+  it("Throwing error when game with given id does not exist", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await gameService.getGame("111");
-    } catch (exception) {
-      expect(exception).toBeDefined();
-      expect(exception.message).toBe("Game with this id does not exist");
+    } catch (error) {
+      const typedError = error as HttpException;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toBe("Game with this id does not exist");
     }
   });
 });

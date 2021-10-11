@@ -18,40 +18,36 @@ describe("Main game", (): void => {
 
   let gameId: string;
 
-  beforeAll(
-    async (): Promise<void> => {
-      await createTestConnection();
-      let usersService = new UsersService();
-      gameService = new GameService();
+  beforeAll(async (): Promise<void> => {
+    await createTestConnection();
+    let usersService = new UsersService();
+    gameService = new GameService();
 
-      // create two users
-      player1 = await usersService.createUser({
-        username: "game_base_1",
-        password: "sample_pwd1",
-        email: "game.base.1@example.com",
-      });
+    // create two users
+    player1 = await usersService.createUser({
+      username: "game_base_1",
+      password: "sample_pwd1",
+      email: "game.base.1@example.com",
+    });
 
-      player2 = await usersService.createUser({
-        username: "game_base_2",
-        password: "sample_pwd2",
-        email: "game.base.2@example.com",
-      });
+    player2 = await usersService.createUser({
+      username: "game_base_2",
+      password: "sample_pwd2",
+      email: "game.base.2@example.com",
+    });
 
-      player3 = await usersService.createUser({
-        username: "game_base_3",
-        password: "sample_pwd3",
-        email: "game.base.3@example.com",
-      });
+    player3 = await usersService.createUser({
+      username: "game_base_3",
+      password: "sample_pwd3",
+      email: "game.base.3@example.com",
+    });
 
-      gameplayService = new GameplayService(gameService, usersService);
+    gameplayService = new GameplayService(gameService, usersService);
 
-      statsRepo = getRepository(GameUserStats);
-    }
-  );
+    statsRepo = getRepository(GameUserStats);
+  });
 
-  it("Throwing an error if initialPlayers have more keys than numPlayers", async (): Promise<
-    void
-  > => {
+  it("Throwing an error if initialPlayers have more keys than numPlayers", async (): Promise<void> => {
     expect.assertions(2);
     try {
       await gameplayService.createGame({
@@ -65,9 +61,12 @@ describe("Main game", (): void => {
           "2": { id: "2", isComputer: true },
         },
       });
-    } catch (e) {
-      expect(e).toBeDefined();
-      expect(e.message).toMatch("Sent more initial players than game supports");
+    } catch (error) {
+      const typedError = error as Error;
+      expect(typedError).toBeDefined();
+      expect(typedError.message).toMatch(
+        "Sent more initial players than game supports"
+      );
     }
   });
 
@@ -129,9 +128,7 @@ describe("Main game", (): void => {
     expect(game.waitingForPlayer).toBe(0);
   });
 
-  it("Able to mark player dead and ignore it for next one", async (): Promise<
-    void
-  > => {
+  it("Able to mark player dead and ignore it for next one", async (): Promise<void> => {
     const game = await gameplayService.createGame({
       fieldHeight: 4,
       fieldWidth: 4,

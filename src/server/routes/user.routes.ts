@@ -1,17 +1,22 @@
-import fp from "fastify-plugin";
-import { FastifyRequest, FastifyReply } from "fastify";
-
 import {
   listUsersSchema,
   putUserSchema,
   getUserSchema,
 } from "../schemas/user.schema";
-import { ServerResponse } from "http";
 import { UsersService } from "../services/users.service";
 import { JWTVerify } from "../authenticators/jwt.authenticator";
 import { getUserId } from "../authenticators/game.authenticator";
+import {
+  FastifyPluginOptions,
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 
-export default fp(async (fastify, _opts, next) => {
+export default async function userRoutes(
+  fastify: FastifyInstance,
+  _opts: FastifyPluginOptions
+) {
   const usersService = new UsersService();
 
   // list
@@ -20,10 +25,7 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: ["GET", "HEAD"],
     schema: listUsersSchema,
-    handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
       const users = await usersService.getUsers();
       return reply.send(users);
     },
@@ -36,8 +38,12 @@ export default fp(async (fastify, _opts, next) => {
     method: ["GET", "HEAD"],
     schema: getUserSchema,
     handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
+      request: FastifyRequest<{
+        Params: {
+          userId: string;
+        };
+      }>,
+      reply: FastifyReply
     ) => {
       const user = await usersService.getUser(request.params.userId);
       return reply.send(user);
@@ -51,10 +57,7 @@ export default fp(async (fastify, _opts, next) => {
     method: ["PUT"],
     schema: putUserSchema,
     preHandler: fastify.auth([JWTVerify]),
-    handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
       const userId = getUserId(request.user);
       const updated = await usersService.updateUser(userId, request.body);
       return reply.send(updated);
@@ -67,10 +70,7 @@ export default fp(async (fastify, _opts, next) => {
     logLevel: "warn",
     method: ["DELETE"],
     preHandler: fastify.auth([JWTVerify]),
-    handler: async (
-      request: FastifyRequest,
-      reply: FastifyReply<ServerResponse>
-    ) => {
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
       const userId = getUserId(request.user);
       // TODO: clear everything associated with this user
       const result = usersService.deleteUser(userId);
@@ -82,6 +82,4 @@ export default fp(async (fastify, _opts, next) => {
       });
     },
   });
-
-  next();
-});
+}

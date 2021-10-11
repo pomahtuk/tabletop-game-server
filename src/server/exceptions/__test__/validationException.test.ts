@@ -1,5 +1,5 @@
 import ValidationException from "../validationException";
-import { BAD_REQUEST } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 
 describe("ValidationException", (): void => {
   it("Exports exception", () => {
@@ -11,7 +11,7 @@ describe("ValidationException", (): void => {
     expect(exception).toBeDefined();
     expect(exception.message).toBe("test");
     expect(exception.errors).not.toBeDefined();
-    expect(exception.status).toBe(BAD_REQUEST);
+    expect(exception.status).toBe(StatusCodes.BAD_REQUEST);
   });
 
   it("ValidationException with errors have BAD_REQUEST status and errors mentioned in message", (): void => {
@@ -28,6 +28,6 @@ describe("ValidationException", (): void => {
     expect(exception.message).toContain("test");
     expect(exception.message).toContain("validation_error");
     expect(exception.errors).toHaveLength(1);
-    expect(exception.status).toBe(BAD_REQUEST);
+    expect(exception.status).toBe(StatusCodes.BAD_REQUEST);
   });
 });

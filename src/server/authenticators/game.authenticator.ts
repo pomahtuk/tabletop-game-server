@@ -1,13 +1,21 @@
-import { FastifyError, FastifyReply, FastifyRequest, JWTTypes } from "fastify";
-import { ServerResponse } from "http";
+import {
+  FastifyError,
+  FastifyReply,
+  FastifyRequest,
+  RawServerBase,
+} from "fastify";
 import { User } from "../dao/entities/user";
 import { getRepository } from "typeorm";
 import { Game } from "../dao/entities/game";
 
 export const UserInGameVerify = async (
-  request: FastifyRequest,
-  reply: FastifyReply<ServerResponse>,
-  done: (err?: FastifyError | undefined) => void
+  request: FastifyRequest<{
+    Params: {
+      gameId: string;
+    };
+  }>,
+  _: FastifyReply<RawServerBase>,
+  done: (err?: Error | undefined) => void
 ) => {
   const repo = getRepository(Game);
   const { gameId } = request.params;
@@ -33,11 +41,11 @@ export const UserInGameVerify = async (
     }
     return done(new Error("User could not access this game"));
   } catch (error) {
-    return done(error);
+    return done(error as Error);
   }
 };
 
-export const getUserId = (user: JWTTypes.SignPayloadType): string => {
+export const getUserId = (user: any): string => {
   // this is types issue, in fact request.user is an object
-  return (user as any).id as string;
+  return (user as User).id;
 };
