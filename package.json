@@ -46,7 +46,7 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.4.8",
     "randomcolor": "^0.5.4",
-    "sqlite3": "^5.0.0",
+    "sqlite3": "^5.0.3",
     "ts-node": "^8.7.0",
     "typeorm": "^0.2.25",
     "typescript": "^3.8.3",
